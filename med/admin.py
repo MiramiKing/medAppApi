@@ -1,14 +1,11 @@
 from django.contrib import admin
+from django.db.models import Model
+import inspect
+from . import models
 
-from .models import *
+for name, obj in inspect.getmembers(models):
+    if inspect.isclass(obj)  and issubclass(obj, Model) and not obj._meta.abstract:
+            admin.site.register(obj)
 
-admin.site.register(Sanatorium)
-admin.site.register(UserProfile)
-admin.site.register(Admin)
-admin.site.register(PasportData)
-admin.site.register(Patient)
-admin.site.register(Question)
-admin.site.register(Form)
-admin.site.register(Article)
 
 # Register your models here.

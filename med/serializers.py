@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import UserProfile
-from  django.contrib.auth import authenticate
+from django.contrib.auth import authenticate
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
@@ -8,6 +9,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """ Сериализация регистрации пользователя и создания нового. """
@@ -35,9 +37,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         # написали ранее, для создания нового пользователя.
         return UserProfile.objects.create_user(**validated_data)
 
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
-    username=serializers.CharField(max_length=255,read_only=True)
+    username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
 
@@ -65,7 +68,7 @@ class LoginSerializer(serializers.Serializer):
         # предоставленные почта и пароль соответствуют какому-то пользователю в
         # нашей базе данных. Мы передаем email как username, так как в модели
         # пользователя USERNAME_FIELD = email.
-        user = authenticate(username=email,password=password)
+        user = authenticate(username=email, password=password)
 
         # Если пользователь с данными почтой/паролем не найден, то authenticate
         # вернет None. Возбудить исключение в таком случае.
@@ -90,6 +93,7 @@ class LoginSerializer(serializers.Serializer):
             'token': user.token
         }
 
+
 class UserSerializer(serializers.ModelSerializer):
     """ Ощуществляет сериализацию и десериализацию объектов User. """
 
@@ -104,7 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('email','username','password','token')
+        fields = ('email', 'username', 'password', 'token')
 
         # Параметр read_only_fields является альтернативой явному указанию поля
         # с помощью read_only = True, как мы это делали для пароля выше.
@@ -122,10 +126,10 @@ class UserSerializer(serializers.ModelSerializer):
         # хешированием и 'солением'. Это означает, что нам нужно удалить поле
         # пароля из словаря 'validated_data' перед его использованием далее.
 
-        password = validated_data.pop('password',None)
+        password = validated_data.pop('password', None)
 
-        for key,value in validated_data.items():
-            setattr(instance,key,value)
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
 
         if password:
             instance.set_password(password)

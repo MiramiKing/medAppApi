@@ -1,19 +1,27 @@
 from django.db import models
 from django.core import validators
+from django.utils import timezone
 
 import jwt
 
 from datetime import datetime, timedelta
-
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
+from django.core.validators import RegexValidator
 
 ROLES_CHOICES = [('Admin', 'Админ'), ('Doctor', 'Врач'), ('Patient', 'Пациент')]
+MENU_CHOICES = [('Breakfast', 'Завтрак'), ('Lunch', 'Обед'), ('Dinner', 'Обед')]
 GENDER_CHOICES = [('Male', 'Мужской'), ('Female', 'Женский')]
 PATIENT_STATUS_CHOICES = [('Accept', 'Принят'), ('Discharged', 'Выписан')]
 PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
+PATIENT_GROUP_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
+NOTIFICATION_STATUS_CHOICES = [('Sended', 'Отправлена'), ('Not Sended', 'Не отправлена')]
+TASK_STATUS_CHOICES = [('Done', 'Сделана'), ('Not done', 'Не сделана')]
+NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
+RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
 
 
 class UserManager(BaseUserManager):
@@ -57,7 +65,10 @@ class Sanatorium(models.Model):
                               unique=True,
                               blank=False
                               )
-    tel = models.CharField(verbose_name='Телефон', max_length=20)
+
+    phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
     adress = models.CharField(verbose_name='Адерс', max_length=20)
 
     class Meta:
@@ -66,6 +77,14 @@ class Sanatorium(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TimeTable(models.Model):
+    daties = ArrayField(models.DateField())
+
+    class Meta:
+        verbose_name = 'Расписание'
+        verbose_name_plural = 'Расписания'
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -92,12 +111,14 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.
-    role = models.CharField(verbose_name='Роль', max_length=30, choices=ROLES_CHOICES)
-    firstName = models.CharField(verbose_name='Имя', max_length=30,null=True)
-    secondName = models.CharField(verbose_name='Фамилия', max_length=30,null=True)
-    thirdName = models.CharField(verbose_name='Отчество', max_length=30,null=True)
+    role = models.CharField(verbose_name='Роль', max_length=50, choices=ROLES_CHOICES)
+    firstName = models.CharField(verbose_name='Имя', max_length=30, null=True)
+    secondName = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
+    thirdName = models.CharField(verbose_name='Отчество', max_length=30, null=True)
     photo = models.ImageField(verbose_name='Ключ', upload_to='users', null=True)
-    tel = models.CharField(verbose_name='Телефон', max_length=20,null=True)
+    phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
     # Свойство USERNAME_FIELD сообщает нам, какое поле мы будем использовать
     # для входа в систему. В данном случае мы хотим использовать почту.
     USERNAME_FIELD = 'email'
@@ -151,6 +172,52 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         return token.encode().decode('utf-8')
 
 
+# Восстановление доступа????
+
+class Notification(models.Model):
+    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    # тип
+    name = models.CharField(verbose_name='Тип', max_length=50)
+    description = models.TextField(verbose_name='Содержание')
+    source = models.CharField(verbose_name='Источник', max_length=50)
+    date_of_sending = models.DateField(verbose_name='Дата отправки', blank=True, default=timezone.now)
+    status = models.CharField(verbose_name='Статус', max_length=50, choices=NOTIFICATION_STATUS_CHOICES)
+
+    class Meta:
+        verbose_name = 'Уведомление'
+        verbose_name_plural = 'Уведомления'
+
+
+class NotificationSettings(models.Model):
+    # Источник уведомления(тип)
+    time = models.IntegerField(verbose_name='Время', choices=NOTIFICATION_SEND_TIME)
+    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Конфигурация уведомлений'
+        verbose_name_plural = 'Конфигурация уведомлений'
+
+
+class Notes(models.Model):
+    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    title = models.CharField(verbose_name='Заголовок', max_length=50)
+    date_of_creation = models.DateField(verbose_name='Дата создания', blank=True, default=timezone.now)
+
+    class Meta:
+        verbose_name = 'Заметка'
+        verbose_name_plural = 'Заметки'
+
+
+class Task(models.Model):
+    description = models.TextField(verbose_name='Содержание')
+    status = models.CharField(verbose_name='Статус', max_length=50, choices=TASK_STATUS_CHOICES)
+    note = models.ForeignKey(Notes, verbose_name='Заметки', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name = 'Задача'
+        verbose_name_plural = 'Задачи'
+
+
 class Admin(models.Model):
     user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     position = models.CharField(verbose_name='Должность', max_length=30)
@@ -164,20 +231,19 @@ class Admin(models.Model):
         return name
 
 
-
-
 class Patient(models.Model):
     user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     birth_date = models.DateField(verbose_name='Дата рождения')
-    gender = models.CharField(verbose_name='Пол', max_length=30, choices=GENDER_CHOICES)
+    gender = models.CharField(verbose_name='Пол', max_length=50, choices=GENDER_CHOICES)
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
     region = models.CharField(verbose_name='Город', max_length=30)
     city = models.CharField(verbose_name='Регион', max_length=30)
 
     bonus = models.CharField(verbose_name='Бонус', max_length=30)
-    status = models.CharField(verbose_name='Статус', max_length=30, choices=PATIENT_STATUS_CHOICES)
+    status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
-    type = models.CharField(verbose_name='Тип', max_length=30, choices=PATIENT_TYPE_CHOICES)
+    type = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)
+    group = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)
 
     class Meta:
         verbose_name = 'Пациент'
@@ -189,7 +255,60 @@ class Patient(models.Model):
     # TODO Регионы и города
 
 
-class PasportData(models.Model):
+class Service(models.Model):
+    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
+    timetable = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, verbose_name='Название')
+    cost = models.FloatField(verbose_name='Стоимость')
+
+    class Meta:
+        verbose_name = 'Услуга'
+        verbose_name_plural = 'Услуги'
+
+
+class MedPersona(models.Model):
+    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    time_table = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE, null=True)
+    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    service_type = models.CharField(verbose_name='Вид услуги', max_length=30)
+    position = models.CharField(verbose_name='Должность', max_length=30)
+    qualification = models.CharField(verbose_name='Квалификация', max_length=30)
+    specialty = models.CharField(verbose_name='Специальность', max_length=30)
+    experience = models.CharField(verbose_name='Стаж', max_length=30)
+    location = models.IntegerField(verbose_name='Расположение (кабинет)')
+    bibliography = models.TextField(verbose_name='Биография')
+
+    class Meta:
+        verbose_name = 'Мед персона'
+        verbose_name_plural = 'Мед персоны'
+
+
+class Medcard(models.Model):
+    patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
+    height = models.IntegerField(verbose_name='Рост')
+    # расписание занятий ??
+    allergies = ArrayField(models.CharField(max_length=256))
+    rsk = models.IntegerField(verbose_name='Суточный рост калорий')
+    complaints = models.TextField(verbose_name='Жалобы')
+
+    class Meta:
+        verbose_name = 'Медкарта'
+        verbose_name_plural = 'Медкарты'
+
+
+class Epyicrisis(models.Model):
+    medcard = models.ForeignKey(Medcard, verbose_name='Медкарта', on_delete=models.CASCADE)
+    medpersona = models.ForeignKey(MedPersona, verbose_name='Медкарта', on_delete=models.CASCADE, null=True)
+    date = models.DateField(verbose_name='Дата создания')
+    complaints = models.TextField(verbose_name='Жалобы')
+
+    # persona
+    class Meta:
+        verbose_name = 'Эпикриз'
+        verbose_name_plural = 'Эпикризы'
+
+
+class PassportData(models.Model):
     patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
     series = models.IntegerField(verbose_name='Серия')
     number = models.IntegerField(verbose_name='Номер')
@@ -216,6 +335,41 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class Answer(models.Model):
+    answer = models.TextField(verbose_name='Ответ')
+
+    class Meta:
+        verbose_name = 'Ответ'
+        verbose_name_plural = 'Ответы'
+
+
+class FAQ(models.Model):
+    question = models.ForeignKey(Question, verbose_name='Вопрос', on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, verbose_name='Ответ', on_delete=models.CASCADE)
+
+
+class Menu(models.Model):
+    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
+    ration = models.CharField(verbose_name='Рацион', max_length=50, choices=MENU_CHOICES)
+
+    # Расписание?
+
+    class Meta:
+        verbose_name = 'Меню'
+        verbose_name_plural = 'Меню'
+
+
+class Dish(models.Model):
+    menu = models.ForeignKey(Menu, verbose_name='Меню', on_delete=models.CASCADE)
+    # тип блюда?
+
+    name = models.CharField(max_length=255, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Блюдо'
+        verbose_name_plural = 'Блюда'
 
 
 class Form(models.Model):
@@ -246,3 +400,60 @@ class Article(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Translation(models.Model):
+    heading = models.CharField(max_length=255, verbose_name='Заголовок')
+    description = models.TextField(verbose_name='Описание')
+    created = models.DateTimeField(editable=False, verbose_name='Дата создания')
+
+    def save(self, *args, **kwargs):
+        ''' On save, update timestamps '''
+        if not self.id:
+            self.created = timezone.now()
+        return super(Translation, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Трансляция'
+        verbose_name_plural = 'Трансляции'
+
+
+class Procedure(Service):
+    photo = models.ImageField(verbose_name='Ключ', upload_to='procedurs', null=True)
+    description = models.TextField(verbose_name='Описание')
+    сontraindications = models.TextField(verbose_name='Противопоказания')
+
+    class Meta:
+        verbose_name = 'Процедура'
+        verbose_name_plural = 'Процедуры'
+
+
+class Survey(Service):
+    description = models.TextField(verbose_name='Описание')
+    purposes = models.TextField(verbose_name='Назначения')
+
+    class Meta:
+        verbose_name = 'Обследовние'
+        verbose_name_plural = 'Обследования'
+
+
+# таблица специальность
+
+class Recommendation(models.Model):
+    epyicrisis = models.ForeignKey(Epyicrisis, verbose_name='Эпикриз', on_delete=models.CASCADE)
+    type = models.CharField(max_length=255, verbose_name='Тип', choices=RECOMMENDATION_CHOICES)
+
+    # период
+
+    class Meta:
+        verbose_name = 'Рекомендация'
+        verbose_name_plural = 'Рекомендации'
+
+
+class RecommendationProcedure(models.Model):
+    recommendation = models.ForeignKey(Recommendation, verbose_name='Рекомендация', on_delete=models.CASCADE)
+    procedure = models.ForeignKey(Procedure, verbose_name='Процедура', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Рекомендация-Процедура'
+        verbose_name_plural = 'Рекомендации-Процедуры'
