@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserProfile
+from .models import *
 from django.contrib.auth import authenticate
 
 
@@ -30,7 +30,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = UserProfile
         # Перечислить все поля, которые могут быть включены в запрос
         # или ответ, включая поля, явно указанные выше.
-        fields = ['email', 'username', 'password', 'token']
+        fields = '__all__'
 
     def create(self, validated_data):
         # Использовать метод create_user, который мы
@@ -108,7 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('email', 'username', 'password', 'token')
+        fields = '__all__'
 
         # Параметр read_only_fields является альтернативой явному указанию поля
         # с помощью read_only = True, как мы это делали для пароля выше.
@@ -133,6 +133,48 @@ class UserSerializer(serializers.ModelSerializer):
 
         if password:
             instance.set_password(password)
+
+        instance.save()
+
+        return instance
+
+class MedPeronaSerializer(serializers.ModelSerializer):
+    #token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = MedPersona
+        # Перечислить все поля, которые могут быть включены в запрос
+        # или ответ, включая поля, явно указанные выше.
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return MedPersona.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+
+        return instance
+
+class PatientSerializer(serializers.ModelSerializer):
+    #token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = Patient
+        # Перечислить все поля, которые могут быть включены в запрос
+        # или ответ, включая поля, явно указанные выше.
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Patient.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
 
         instance.save()
 

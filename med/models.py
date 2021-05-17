@@ -31,7 +31,7 @@ class UserManager(BaseUserManager):
     же самого кода, который Django использовал для создания User (для демонстрации).
     """
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, firstName, secondName, thirdName, phone_number, role, password=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
         if username is None:
             raise TypeError('Users must have a username.')
@@ -39,7 +39,11 @@ class UserManager(BaseUserManager):
         if email is None:
             raise TypeError('Users must have an email address.')
 
-        user = self.model(username=username, email=self.normalize_email(email))
+        if password is None:
+            raise TypeError('Users must have a password.')
+
+        user = self.model(username=username, email=self.normalize_email(email), firstName=firstName,
+                          secondName=secondName, thirdName=thirdName, phone_number=phone_number, role=role,password=password)
         user.set_password(password)
         user.save()
 
@@ -115,10 +119,11 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     firstName = models.CharField(verbose_name='Имя', max_length=30, null=True)
     secondName = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
     thirdName = models.CharField(verbose_name='Отчество', max_length=30, null=True)
-    photo = models.ImageField(verbose_name='Ключ', upload_to='users', null=True)
+    photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
     phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
+
     # Свойство USERNAME_FIELD сообщает нам, какое поле мы будем использовать
     # для входа в систему. В данном случае мы хотим использовать почту.
     USERNAME_FIELD = 'email'
@@ -219,7 +224,7 @@ class Task(models.Model):
 
 
 class Admin(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     position = models.CharField(verbose_name='Должность', max_length=30)
 
     class Meta:
@@ -232,7 +237,7 @@ class Admin(models.Model):
 
 
 class Patient(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     birth_date = models.DateField(verbose_name='Дата рождения')
     gender = models.CharField(verbose_name='Пол', max_length=50, choices=GENDER_CHOICES)
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
@@ -243,7 +248,7 @@ class Patient(models.Model):
     status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)
+    group = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)#????
 
     class Meta:
         verbose_name = 'Пациент'
@@ -267,9 +272,9 @@ class Service(models.Model):
 
 
 class MedPersona(models.Model):
-    user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     time_table = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE, null=True)
-    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     service_type = models.CharField(verbose_name='Вид услуги', max_length=30)
     position = models.CharField(verbose_name='Должность', max_length=30)
     qualification = models.CharField(verbose_name='Квалификация', max_length=30)
@@ -309,15 +314,15 @@ class Epyicrisis(models.Model):
 
 
 class PassportData(models.Model):
-    patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
+    patient = models.OneToOneField(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
     series = models.IntegerField(verbose_name='Серия')
     number = models.IntegerField(verbose_name='Номер')
     date = models.DateField(verbose_name='Дата выдачи')
     by_whom = models.CharField(max_length=255, verbose_name='Кем выдан')
 
     class Meta:
-        verbose_name = 'Поспортные данные'
-        verbose_name_plural = 'Поспортные данные'
+        verbose_name = 'Паспортные данные'
+        verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
         name = self.patient.user.firstName + ' ' + self.patient.user.secondName + ' ' + self.patient.user.thirdName

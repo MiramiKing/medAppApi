@@ -58,9 +58,9 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
         # К настоящему моменту есть "шанс", что аутентификация пройдет успешно.
         # Мы делегируем фактическую аутентификацию учетных данных методу ниже.
-        return self._authenticate_credentials(request, token)
+        return self.authenticate_credentials(request, token)
 
-    def _authenticate_credentials(self, request, token):
+    def authenticate_credentials(self, request, token):
         """
         Попытка аутентификации с предоставленными данными. Если успешно -
         вернуть пользователя и токен, иначе - сгенерировать исключение.
