@@ -138,9 +138,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
-class MedPeronaSerializer(serializers.ModelSerializer):
-    #token = serializers.CharField(max_length=255, read_only=True)
 
+class MedPeronaSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedPersona
         # Перечислить все поля, которые могут быть включены в запрос
@@ -151,7 +150,6 @@ class MedPeronaSerializer(serializers.ModelSerializer):
         return MedPersona.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-
         for key, value in validated_data.items():
             setattr(instance, key, value)
 
@@ -159,8 +157,9 @@ class MedPeronaSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class PatientSerializer(serializers.ModelSerializer):
-    #token = serializers.CharField(max_length=255, read_only=True)
+    # token = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = Patient
@@ -172,10 +171,36 @@ class PatientSerializer(serializers.ModelSerializer):
         return Patient.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-
         for key, value in validated_data.items():
             setattr(instance, key, value)
 
         instance.save()
 
         return instance
+
+class AdminSerializer(serializers.ModelSerializer):
+    # token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = Admin
+        # Перечислить все поля, которые могут быть включены в запрос
+        # или ответ, включая поля, явно указанные выше.
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Admin.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+
+        return instance
+
+
+
+class PassportDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PassportData
+        fields = '__all__'
