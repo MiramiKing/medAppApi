@@ -5,4 +5,7 @@
 venv/
 
 # migration files
-migrations/*
+migrations/
+
+# python bytecode cache files
+__pycache__/
