@@ -17,7 +17,7 @@ MENU_CHOICES = [('Breakfast', 'Завтрак'), ('Lunch', 'Обед'), ('Dinner
 GENDER_CHOICES = [('Male', 'Мужской'), ('Female', 'Женский')]
 PATIENT_STATUS_CHOICES = [('Accept', 'Принят'), ('Discharged', 'Выписан')]
 PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
-PATIENT_GROUP_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
+PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')] # стоит дополнить
 NOTIFICATION_STATUS_CHOICES = [('Sended', 'Отправлена'), ('Not Sended', 'Не отправлена')]
 TASK_STATUS_CHOICES = [('Done', 'Сделана'), ('Not done', 'Не сделана')]
 NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
@@ -43,7 +43,8 @@ class UserManager(BaseUserManager):
             raise TypeError('Users must have a password.')
 
         user = self.model(username=username, email=self.normalize_email(email), firstName=firstName,
-                          secondName=secondName, thirdName=thirdName, phone_number=phone_number, role=role,password=password)
+                          secondName=secondName, thirdName=thirdName, phone_number=phone_number, role=role,
+                          password=password)
         user.set_password(password)
         user.save()
 
@@ -73,7 +74,7 @@ class Sanatorium(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
-    adress = models.CharField(verbose_name='Адерс', max_length=20)
+    address = models.CharField(verbose_name='Адрес', max_length=20)
 
     class Meta:
         verbose_name = 'Санаторий'
@@ -84,7 +85,7 @@ class Sanatorium(models.Model):
 
 
 class TimeTable(models.Model):
-    daties = ArrayField(models.DateField())
+    dates = ArrayField(models.DateField())
 
     class Meta:
         verbose_name = 'Расписание'
@@ -243,12 +244,13 @@ class Patient(models.Model):
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
     region = models.CharField(verbose_name='Город', max_length=30)
     city = models.CharField(verbose_name='Регион', max_length=30)
+    receipt_date = models.DateField(verbose_name='Дата поступления', blank=True, default=timezone.now)
 
-    bonus = models.CharField(verbose_name='Бонус', max_length=30)
+    # bonus = models.CharField(verbose_name='Бонус', max_length=30)
     status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
-    api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
-    type = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Тип', max_length=50, choices=PATIENT_TYPE_CHOICES)#????
+    # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
+    type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
+    group = models.CharField(verbose_name='Группа', max_length=50, choices=PATIENT_GROUP_CHOICES)  # ????
 
     class Meta:
         verbose_name = 'Пациент'
@@ -262,7 +264,7 @@ class Patient(models.Model):
 
 class Service(models.Model):
     sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
-    timetable = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
+    timetable = models.OneToOneField(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, verbose_name='Название')
     cost = models.FloatField(verbose_name='Стоимость')
 
@@ -273,8 +275,9 @@ class Service(models.Model):
 
 class MedPersona(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
-    time_table = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE, null=True)
-    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    # time_table = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE, null=True)
+    # service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    birth_date = models.DateField(verbose_name='Дата рождения')
     service_type = models.CharField(verbose_name='Вид услуги', max_length=30)
     position = models.CharField(verbose_name='Должность', max_length=30)
     qualification = models.CharField(verbose_name='Квалификация', max_length=30)
@@ -288,13 +291,22 @@ class MedPersona(models.Model):
         verbose_name_plural = 'Мед персоны'
 
 
+class ServiceMedPersona(models.Model):
+    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    medpersona = models.ForeignKey(MedPersona, verbose_name='Мед персона', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Услуга-Медперсона'
+        verbose_name_plural = 'Услуги-Медперсоны'  # ??
+
+
 class Medcard(models.Model):
     patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
     height = models.IntegerField(verbose_name='Рост')
     # расписание занятий ??
     allergies = ArrayField(models.CharField(max_length=256))
-    rsk = models.IntegerField(verbose_name='Суточный рост калорий')
-    complaints = models.TextField(verbose_name='Жалобы')
+    rsk = models.IntegerField(verbose_name='Рекомендуемая суточная норма калорий')
+    complaints = models.TextField(verbose_name='Жалобы', help_text='Общие субъективные жалобы')
 
     class Meta:
         verbose_name = 'Медкарта'
@@ -303,8 +315,9 @@ class Medcard(models.Model):
 
 class Epyicrisis(models.Model):
     medcard = models.ForeignKey(Medcard, verbose_name='Медкарта', on_delete=models.CASCADE)
-    medpersona = models.ForeignKey(MedPersona, verbose_name='Медкарта', on_delete=models.CASCADE, null=True)
+    medpersona = models.OneToOneField(MedPersona, verbose_name='Мед персона', on_delete=models.CASCADE, null=True)
     date = models.DateField(verbose_name='Дата создания')
+    # анамнез = ...
     complaints = models.TextField(verbose_name='Жалобы')
 
     # persona
@@ -351,6 +364,7 @@ class Answer(models.Model):
 
 
 class FAQ(models.Model):
+    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, verbose_name='Вопрос', on_delete=models.CASCADE)
     answer = models.ForeignKey(Answer, verbose_name='Ответ', on_delete=models.CASCADE)
 
@@ -394,10 +408,10 @@ class Form(models.Model):
 
 class Article(models.Model):
     sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name='Название')
+    name = models.CharField(max_length=255, verbose_name='Заголовок')
     content = models.TextField(verbose_name='Содержание')
     date = models.DateField(verbose_name='Дата создания')
-    source = models.CharField(verbose_name='Источник', max_length=255)
+    # source = models.CharField(verbose_name='Источник', max_length=255)
 
     class Meta:
         verbose_name = 'Новость'
@@ -408,9 +422,10 @@ class Article(models.Model):
 
 
 class Translation(models.Model):
-    heading = models.CharField(max_length=255, verbose_name='Заголовок')
+    heading = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     created = models.DateTimeField(editable=False, verbose_name='Дата создания')
+    # ссылка на трансляцию ??
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
@@ -424,9 +439,10 @@ class Translation(models.Model):
 
 
 class Procedure(Service):
-    photo = models.ImageField(verbose_name='Ключ', upload_to='procedurs', null=True)
+    photo = models.ImageField(verbose_name='Ключ', upload_to='procedures', null=True)
     description = models.TextField(verbose_name='Описание')
     сontraindications = models.TextField(verbose_name='Противопоказания')
+    # назначения ??
 
     class Meta:
         verbose_name = 'Процедура'
@@ -436,6 +452,7 @@ class Procedure(Service):
 class Survey(Service):
     description = models.TextField(verbose_name='Описание')
     purposes = models.TextField(verbose_name='Назначения')
+    photo = models.ImageField(verbose_name='Фото', upload_to='surveys', null=True)
 
     class Meta:
         verbose_name = 'Обследовние'
@@ -445,7 +462,7 @@ class Survey(Service):
 # таблица специальность
 
 class Recommendation(models.Model):
-    epyicrisis = models.ForeignKey(Epyicrisis, verbose_name='Эпикриз', on_delete=models.CASCADE)
+    epyicrisis = models.OneToOneField(Epyicrisis, verbose_name='Эпикриз', on_delete=models.CASCADE)
     type = models.CharField(max_length=255, verbose_name='Тип', choices=RECOMMENDATION_CHOICES)
 
     # период
@@ -456,8 +473,8 @@ class Recommendation(models.Model):
 
 
 class RecommendationProcedure(models.Model):
-    recommendation = models.ForeignKey(Recommendation, verbose_name='Рекомендация', on_delete=models.CASCADE)
-    procedure = models.ForeignKey(Procedure, verbose_name='Процедура', on_delete=models.CASCADE)
+    recommendation = models.OneToOneField(Recommendation, verbose_name='Рекомендация', on_delete=models.CASCADE)
+    procedure = models.OneToOneField(Procedure, verbose_name='Процедура', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Рекомендация-Процедура'
