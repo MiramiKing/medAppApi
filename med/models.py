@@ -131,13 +131,12 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     # Временная метка показывающая время последнего обновления объекта.
     updated_at = models.DateTimeField(auto_now=True)
-
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.
     role = models.CharField(verbose_name='Роль', max_length=50, choices=ROLES_CHOICES)
-    firstName = models.CharField(verbose_name='Имя', max_length=30, null=True)
-    secondName = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
-    thirdName = models.CharField(verbose_name='Отчество', max_length=30, null=True)
+    name = models.CharField(verbose_name='Имя', max_length=30, null=True)
+    surname = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
+    patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
     photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
     phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
@@ -251,7 +250,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.firstName + ' ' + self.user.secondName + ' ' + self.user.thirdName
+        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
         return name
 
 
@@ -276,7 +275,7 @@ class Patient(models.Model):
         verbose_name_plural = 'Пациенты'
 
     def __str__(self):
-        name = self.user.firstName + ' ' + self.user.secondName + ' ' + self.user.thirdName
+        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
         return name
     # TODO Регионы и города
 
@@ -354,7 +353,7 @@ class PassportData(models.Model):
         verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
-        name = self.patient.user.firstName + ' ' + self.patient.user.secondName + ' ' + self.patient.user.thirdName
+        name = self.patient.user.first_name + ' ' + self.patient.user.second_name + ' ' + self.patient.user.thirdName
         return name
 
 
