@@ -4,7 +4,7 @@ from django.utils import timezone
 
 import jwt
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.contrib.auth.models import (
@@ -17,7 +17,7 @@ MENU_CHOICES = [('Breakfast', 'Завтрак'), ('Lunch', 'Обед'), ('Dinner
 GENDER_CHOICES = [('Male', 'Мужской'), ('Female', 'Женский')]
 PATIENT_STATUS_CHOICES = [('Accept', 'Принят'), ('Discharged', 'Выписан')]
 PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
-PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')] # стоит дополнить
+PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')]  # стоит дополнить
 NOTIFICATION_STATUS_CHOICES = [('Sended', 'Отправлена'), ('Not Sended', 'Не отправлена')]
 TASK_STATUS_CHOICES = [('Done', 'Сделана'), ('Not done', 'Не сделана')]
 NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
@@ -31,7 +31,7 @@ class UserManager(BaseUserManager):
     же самого кода, который Django использовал для создания User (для демонстрации).
     """
 
-    def create_user(self, username, email, firstName, secondName, thirdName, phone_number, role, password=None):
+    def create_user(self, username, email, name, surname, patronymic, phone_number, role, password=None,photo=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
         if username is None:
             raise TypeError('Users must have a username.')
@@ -42,8 +42,26 @@ class UserManager(BaseUserManager):
         if password is None:
             raise TypeError('Users must have a password.')
 
-        user = self.model(username=username, email=self.normalize_email(email), firstName=firstName,
-                          secondName=secondName, thirdName=thirdName, phone_number=phone_number, role=role,
+        user = self.model(username=username, email=self.normalize_email(email), name=name,
+                          surname=surname, patronymic=patronymic, phone_number=phone_number, role=role,
+                          password=password,photo=photo)
+        user.set_password(password)
+        user.save()
+
+        return user
+
+    def create_user_admin(self, username, email, password):
+        """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
+        if username is None:
+            raise TypeError('Users must have a username.')
+
+        if email is None:
+            raise TypeError('Users must have an email address.')
+
+        if password is None:
+            raise TypeError('Users must have a password.')
+
+        user = self.model(username=username, email=self.normalize_email(email),
                           password=password)
         user.set_password(password)
         user.save()
@@ -55,7 +73,7 @@ class UserManager(BaseUserManager):
         if password is None:
             raise TypeError('Superusers must have a password.')
 
-        user = self.create_user(username=username, email=email, password=password)
+        user = self.create_user_admin(username=username, email=email, password=password)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -113,13 +131,12 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     # Временная метка показывающая время последнего обновления объекта.
     updated_at = models.DateTimeField(auto_now=True)
-
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.
     role = models.CharField(verbose_name='Роль', max_length=50, choices=ROLES_CHOICES)
-    firstName = models.CharField(verbose_name='Имя', max_length=30, null=True)
-    secondName = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
-    thirdName = models.CharField(verbose_name='Отчество', max_length=30, null=True)
+    name = models.CharField(verbose_name='Имя', max_length=30, null=True)
+    surname = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
+    patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
     photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
     phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
@@ -233,31 +250,32 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.firstName + ' ' + self.user.secondName + ' ' + self.user.thirdName
+        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
         return name
 
 
 class Patient(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
-    birth_date = models.DateField(verbose_name='Дата рождения')
+    birth_date = models.DateField(verbose_name='Дата рождения',default =date.today)
     gender = models.CharField(verbose_name='Пол', max_length=50, choices=GENDER_CHOICES)
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
     region = models.CharField(verbose_name='Город', max_length=30)
     city = models.CharField(verbose_name='Регион', max_length=30)
-    receipt_date = models.DateField(verbose_name='Дата поступления', blank=True, default=timezone.now)
+    receipt_date = models.DateTimeField(verbose_name='Дата поступления', blank=True, default=timezone.now)
 
     # bonus = models.CharField(verbose_name='Бонус', max_length=30)
     status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
     group = models.CharField(verbose_name='Группа', max_length=50, choices=PATIENT_GROUP_CHOICES)  # ????
+    complaints = models.TextField(verbose_name='Жалобы при поступлении')
 
     class Meta:
         verbose_name = 'Пациент'
         verbose_name_plural = 'Пациенты'
 
     def __str__(self):
-        name = self.user.firstName + ' ' + self.user.secondName + ' ' + self.user.thirdName
+        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
         return name
     # TODO Регионы и города
 
@@ -275,10 +293,7 @@ class Service(models.Model):
 
 class MedPersona(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
-    # time_table = models.ForeignKey(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE, null=True)
-    # service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     birth_date = models.DateField(verbose_name='Дата рождения')
-    service_type = models.CharField(verbose_name='Вид услуги', max_length=30)
     position = models.CharField(verbose_name='Должность', max_length=30)
     qualification = models.CharField(verbose_name='Квалификация', max_length=30)
     specialty = models.CharField(verbose_name='Специальность', max_length=30)
@@ -327,7 +342,7 @@ class Epyicrisis(models.Model):
 
 
 class PassportData(models.Model):
-    patient = models.OneToOneField(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
+    user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     series = models.IntegerField(verbose_name='Серия')
     number = models.IntegerField(verbose_name='Номер')
     date = models.DateField(verbose_name='Дата выдачи')
@@ -338,7 +353,7 @@ class PassportData(models.Model):
         verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
-        name = self.patient.user.firstName + ' ' + self.patient.user.secondName + ' ' + self.patient.user.thirdName
+        name = self.patient.user.first_name + ' ' + self.patient.user.second_name + ' ' + self.patient.user.thirdName
         return name
 
 
@@ -411,6 +426,7 @@ class Article(models.Model):
     name = models.CharField(max_length=255, verbose_name='Заголовок')
     content = models.TextField(verbose_name='Содержание')
     date = models.DateField(verbose_name='Дата создания')
+
     # source = models.CharField(verbose_name='Источник', max_length=255)
 
     class Meta:
@@ -425,6 +441,7 @@ class Translation(models.Model):
     heading = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     created = models.DateTimeField(editable=False, verbose_name='Дата создания')
+
     # ссылка на трансляцию ??
 
     def save(self, *args, **kwargs):
@@ -442,6 +459,7 @@ class Procedure(Service):
     photo = models.ImageField(verbose_name='Ключ', upload_to='procedures', null=True)
     description = models.TextField(verbose_name='Описание')
     сontraindications = models.TextField(verbose_name='Противопоказания')
+
     # назначения ??
 
     class Meta:
