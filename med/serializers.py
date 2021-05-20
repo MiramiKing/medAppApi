@@ -43,6 +43,7 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
+    role = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
         # В методе validate мы убеждаемся, что текущий экземпляр
@@ -90,7 +91,8 @@ class LoginSerializer(serializers.Serializer):
         return {
             'email': user.email,
             'username': user.username,
-            'token': user.token
+            'token': user.token,
+            'role': user.role,
         }
 
 
@@ -105,7 +107,8 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
-    #photo = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+
+    # photo = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
 
     class Meta:
         model = UserProfile
@@ -179,6 +182,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class AdminSerializer(serializers.ModelSerializer):
     # token = serializers.CharField(max_length=255, read_only=True)
 
@@ -198,7 +202,6 @@ class AdminSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
 
 
 class PassportDataSerializer(serializers.ModelSerializer):
