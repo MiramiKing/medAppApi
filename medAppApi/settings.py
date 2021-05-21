@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'rest_framework',
-    'letsencrypt',
     'rest_framework_simplejwt',
 
 ]
