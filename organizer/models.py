@@ -9,7 +9,7 @@ class Record(models.Model):
     date_of_creation = models.DateTimeField(verbose_name='Дата записи')
     date_start = models.DateTimeField(verbose_name='Дата начала')
     date_end = models.DateTimeField(verbose_name='Дата окончания')
-    done = models.BooleanField(verbose_name='Статус завершения', default=False)
+    done = models.BooleanField(verbose_name='Завершен', default=False)
     description = models.TextField(verbose_name='Описание', max_length=500, blank=True)
 
     class Meta:
