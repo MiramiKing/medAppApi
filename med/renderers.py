@@ -53,7 +53,12 @@ class OtherJSONRenderer(JSONRenderer):
         if token is not None and isinstance(token, bytes):
             # Как говорится выше, декодирует token если он имеет тип bytes.
             data['token'] = token.decode('utf-8')
-        name = data.serializer.instance.__class__.__name__.lower()
+        if type(data) == dict and len(data) == 1:
+            name = 'error'
+        elif type(data) == dict and len(data) > 1:
+            name = 'data'
+        else:
+            name = data.serializer.instance.__class__.__name__.lower()
         # Наконец, мы можем отобразить наши данные в простанстве имен 'user'.
         return json.dumps({
             name: data

@@ -9,9 +9,10 @@ from rest_framework.serializers import ModelSerializer
 from medAppApi.license import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, viewsets
 from .serializers import *
 from .renderers import *
+from rest_framework.renderers import JSONRenderer
 
 
 class UserProfileListCreateView(ListCreateAPIView):
@@ -61,8 +62,10 @@ class LoginAPIView(APIView):
 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
+        data = serializer.data
+        data.pop('email')
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
@@ -91,15 +94,14 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 class MedPersonaAPIView(APIView):
     serializer_class = MedPeronaSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        patient = MedPersona.objects.get(user=request.user)
-        serializer = self.serializer_class(patient)
+        medpersona = get_object_or_404(MedPersona, user=request.user.id)
+        serializer = self.serializer_class(medpersona)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
     def post(self, request):
         serializer_data = request.data.get('medpersona', {})
@@ -110,16 +112,24 @@ class MedPersonaAPIView(APIView):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def patch(self, request, *args, **kwargs):
+        serializer_data = request.data.get('medpersona', {})
+        medpersona = get_object_or_404(MedPersona, user=request.user.id)
+        # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
+        serializer = self.serializer_class(medpersona, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer_data, status=status.HTTP_200_OK)
 
 
 class PatientAPIView(APIView):
     serializer_class = PatientSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated, IsUserPatient]
 
-
     def get(self, request, *args, **kwargs):
-        patient = Patient.objects.get(user=request.user)
+        patient = get_object_or_404(Patient, user=request.user.id)
         serializer = self.serializer_class(patient)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -133,3 +143,76 @@ class PatientAPIView(APIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, *args, **kwargs):
+        serializer_data = request.data.get('user', {})
+
+        # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
+        serializer = self.serializer_class(request.user, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer_data, status=status.HTTP_200_OK)
+
+class AdminAPIView(APIView):
+    serializer_class = AdminSerializer
+    renderer_classes = (JSONRenderer,)
+    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated, IsUserAdmin]
+
+    def get(self, request, *args, **kwargs):
+        patient = get_object_or_404(Admin, user=request.user.id)
+        serializer = self.serializer_class(patient)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=PatientSerializer)
+    def post(self, request):
+        serializer_data = request.data.get('admin', {})
+        serializer_data['user'] = request.user.id
+        serializer = self.serializer_class(data=serializer_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, *args, **kwargs):
+        serializer_data = request.data.get('user', {})
+
+        # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
+        serializer = self.serializer_class(request.user, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer_data, status=status.HTTP_200_OK)
+
+class PassportDataAPIView(APIView):
+    serializer_class = PassportDataSerializer
+    renderer_classes = (JSONRenderer,)
+    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        passport = get_object_or_404(PassportData, user=request.user.id)
+        serializer = self.serializer_class(passport)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=PatientSerializer)
+    def post(self, request):
+        serializer_data = request.data.get('passport', {})
+        serializer_data['user'] = request.user.id
+        serializer = self.serializer_class(data=serializer_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, *args, **kwargs):
+        serializer_data = request.data.get('passport', {})
+
+        # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
+        serializer = self.serializer_class(request.user, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer_data, status=status.HTTP_200_OK)
+
