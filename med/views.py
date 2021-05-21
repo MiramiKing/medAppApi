@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from .serializers import *
 from .renderers import *
+from rest_framework.renderers import JSONRenderer
 
 
 class UserProfileListCreateView(ListCreateAPIView):
@@ -93,7 +94,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 class MedPersonaAPIView(APIView):
     serializer_class = MedPeronaSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -124,7 +125,7 @@ class MedPersonaAPIView(APIView):
 
 class PatientAPIView(APIView):
     serializer_class = PatientSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated, IsUserPatient]
 
     def get(self, request, *args, **kwargs):
@@ -155,7 +156,7 @@ class PatientAPIView(APIView):
 
 class AdminAPIView(APIView):
     serializer_class = AdminSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated, IsUserAdmin]
 
     def get(self, request, *args, **kwargs):
@@ -186,7 +187,7 @@ class AdminAPIView(APIView):
 
 class PassportDataAPIView(APIView):
     serializer_class = PassportDataSerializer
-    renderer_classes = (OtherJSONRenderer,)
+    renderer_classes = (JSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
