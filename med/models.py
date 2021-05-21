@@ -250,7 +250,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
+        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
         return name
 
 
@@ -275,7 +275,7 @@ class Patient(models.Model):
         verbose_name_plural = 'Пациенты'
 
     def __str__(self):
-        name = self.user.first_name + ' ' + self.user.second_name + ' ' + self.user.thirdName
+        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
         return name
     # TODO Регионы и города
 
