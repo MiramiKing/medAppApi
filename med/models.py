@@ -134,9 +134,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     surname = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
     patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
     photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
-    phone_regex = RegexValidator(regex=r'^\+?7?\d{9,15}$',
-                                 message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
+
+    phone_number = models.CharField(max_length=17, blank=True)
 
     # Свойство USERNAME_FIELD сообщает нам, какое поле мы будем использовать
     # для входа в систему. В данном случае мы хотим использовать почту.
