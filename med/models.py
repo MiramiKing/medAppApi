@@ -135,7 +135,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
     photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
 
-    phone_number = models.CharField(max_length=17, blank=True)
+    phone_number = models.CharField(max_length=18, blank=True)
 
     # Свойство USERNAME_FIELD сообщает нам, какое поле мы будем использовать
     # для входа в систему. В данном случае мы хотим использовать почту.
