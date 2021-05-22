@@ -64,7 +64,7 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.data
         data.pop('email')
-        data.pop('username')
+        #data.pop('username')
 
         return Response(data, status=status.HTTP_200_OK)
 

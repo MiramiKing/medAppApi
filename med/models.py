@@ -4,7 +4,7 @@ from django.utils import timezone
 
 import jwt
 
-from datetime import datetime, timedelta,date
+from datetime import datetime, timedelta, date
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.contrib.auth.models import (
@@ -31,10 +31,9 @@ class UserManager(BaseUserManager):
     же самого кода, который Django использовал для создания User (для демонстрации).
     """
 
-    def create_user(self, username, email, name, surname, patronymic, phone_number, role, password=None,photo=None):
+    def create_user(self, email, name, surname, patronymic, phone_number, role, password=None, photo=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
-        if username is None:
-            raise TypeError('Users must have a username.')
+
 
         if email is None:
             raise TypeError('Users must have an email address.')
@@ -42,18 +41,16 @@ class UserManager(BaseUserManager):
         if password is None:
             raise TypeError('Users must have a password.')
 
-        user = self.model(username=username, email=self.normalize_email(email), name=name,
+        user = self.model(email=self.normalize_email(email), name=name,
                           surname=surname, patronymic=patronymic, phone_number=phone_number, role=role,
-                          password=password,photo=photo)
+                          password=password, photo=photo)
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_user_admin(self, username, email, password):
+    def create_user_admin(self, email, password):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
-        if username is None:
-            raise TypeError('Users must have a username.')
 
         if email is None:
             raise TypeError('Users must have an email address.')
@@ -61,19 +58,19 @@ class UserManager(BaseUserManager):
         if password is None:
             raise TypeError('Users must have a password.')
 
-        user = self.model(username=username, email=self.normalize_email(email),
+        user = self.model(email=self.normalize_email(email),
                           password=password)
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_superuser(self, username, email, password):
+    def create_superuser(self, email, password):
         """ Создает и возввращет пользователя с привилегиями суперадмина. """
         if password is None:
             raise TypeError('Superusers must have a password.')
 
-        user = self.create_user_admin(username=username, email=email, password=password)
+        user = self.create_user_admin(email=email, password=password)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -111,7 +108,7 @@ class TimeTable(models.Model):
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(db_index=True, max_length=255, unique=True)
+    # username = models.CharField(db_index=True, max_length=255, unique=True)
     email = models.EmailField(db_index=True, unique=True)
 
     # Когда пользователь более не желает пользоваться нашей системой, он может
@@ -145,7 +142,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     # Свойство USERNAME_FIELD сообщает нам, какое поле мы будем использовать
     # для входа в систему. В данном случае мы хотим использовать почту.
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    # REQUIRED_FIELDS = ['username']
 
     # Сообщает Django, что определенный выше класс UserManager
     # должен управлять объектами этого типа.
@@ -174,11 +171,11 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         почты. Обычно это имя фамилия пользователя, но поскольку мы не
         используем их, будем возвращать username.
         """
-        return self.username
+        return self.email
 
     def get_short_name(self):
         """ Аналогично методу get_full_name(). """
-        return self.username
+        return self.email
 
     def _generate_jwt_token(self):
         """
@@ -256,7 +253,7 @@ class Admin(models.Model):
 
 class Patient(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
-    birth_date = models.DateField(verbose_name='Дата рождения',default =date.today)
+    birth_date = models.DateField(verbose_name='Дата рождения', default=date.today)
     gender = models.CharField(verbose_name='Пол', max_length=50, choices=GENDER_CHOICES)
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
     region = models.CharField(verbose_name='Город', max_length=30)
