@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import authenticate
+from drf_extra_fields.fields import Base64ImageField
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -22,6 +23,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    photo = Base64ImageField()
     # Клиентская сторона не должна иметь возможность отправлять токен вместе с
     # запросом на регистрацию. Сделаем его доступным только на чтение.
     token = serializers.CharField(max_length=255, read_only=True)

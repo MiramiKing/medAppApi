@@ -16,8 +16,8 @@ ROLES_CHOICES = [('Admin', 'Админ'), ('Doctor', 'Врач'), ('Patient', '�
 MENU_CHOICES = [('Breakfast', 'Завтрак'), ('Lunch', 'Обед'), ('Dinner', 'Обед')]
 GENDER_CHOICES = [('Male', 'Мужской'), ('Female', 'Женский')]
 PATIENT_STATUS_CHOICES = [('Accept', 'Принят'), ('Discharged', 'Выписан')]
-PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся')]
-PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')]  # стоит дополнить
+PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся'),('Discharged', 'Выписан')]
+#PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')]  # стоит дополнить
 NOTIFICATION_STATUS_CHOICES = [('Sended', 'Отправлена'), ('Not Sended', 'Не отправлена')]
 TASK_STATUS_CHOICES = [('Done', 'Сделана'), ('Not done', 'Не сделана')]
 NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
@@ -262,7 +262,7 @@ class Patient(models.Model):
     status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Группа', max_length=50, choices=PATIENT_GROUP_CHOICES)  # ????
+    group = models.CharField(verbose_name='Группа', max_length=50,null=True)
     complaints = models.TextField(verbose_name='Жалобы при поступлении')
 
     class Meta:
