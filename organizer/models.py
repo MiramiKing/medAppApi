@@ -21,15 +21,9 @@ class Record(models.Model):
         return 'Запись ' + str(self.id)
 
 
-class AbstractRecord(models.Model):
-    record = models.ForeignKey(Record, verbose_name='Запись', on_delete=models.CASCADE)
-
-    class Meta:
-        abstract = True
-
-
-class RecordService(AbstractRecord):
-    service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+class RecordService(models.Model):
+    record = models.ForeignKey(Record, verbose_name='Запись', related_name='record_service', on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, verbose_name='Услуга', related_name='service_record', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Запись-Услуга'
