@@ -259,7 +259,7 @@ class Patient(models.Model):
     receipt_date = models.DateTimeField(verbose_name='Дата поступления', blank=True, default=timezone.now)
 
     # bonus = models.CharField(verbose_name='Бонус', max_length=30)
-    status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
+    #status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
     group = models.CharField(verbose_name='Группа', max_length=50,null=True)
