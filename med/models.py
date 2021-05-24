@@ -245,7 +245,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
+        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic if self.user.patronymic else ''
         return name
 
 
