@@ -294,8 +294,8 @@ class MedPersona(models.Model):
                                      choices=MEDPERSONA_QUALIFICATION_CHOICES)
     # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
-    location = models.IntegerField(verbose_name='Расположение (кабинет)')
-    specilization = models.TextField(verbose_name='Специализация',null=True)
+    location = models.IntegerField(verbose_name='Расположение (кабинет)', null=True)
+    specilization = models.TextField(verbose_name='Специализация', null=True)
     education = models.TextField(verbose_name='Образование', null=True)
 
     class Meta:
@@ -340,8 +340,8 @@ class Epyicrisis(models.Model):
 
 class PassportData(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
-    series = models.IntegerField(verbose_name='Серия')
-    number = models.IntegerField(verbose_name='Номер')
+    series_number = models.CharField(verbose_name='Серия и номер', max_length=20)
+    code = models.CharField(verbose_name='Код подразделения', max_length=10)
     date = models.DateField(verbose_name='Дата выдачи')
     by_whom = models.CharField(max_length=255, verbose_name='Кем выдан')
 
