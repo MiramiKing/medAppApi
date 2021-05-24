@@ -302,6 +302,10 @@ class MedPersona(models.Model):
         verbose_name = 'Мед персона'
         verbose_name_plural = 'Мед персоны'
 
+    def __str__(self):
+        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
+        return name
+
 
 class ServiceMedPersona(models.Model):
     service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
