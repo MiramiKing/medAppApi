@@ -350,7 +350,7 @@ class PassportData(models.Model):
         verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
-        name = self.patient.user.name + ' ' + self.patient.user.surname + ' ' + self.patient.user.patronymic
+        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
         return name
 
 
