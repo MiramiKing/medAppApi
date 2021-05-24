@@ -16,12 +16,14 @@ ROLES_CHOICES = [('Admin', 'Админ'), ('Doctor', 'Врач'), ('Patient', '�
 MENU_CHOICES = [('Breakfast', 'Завтрак'), ('Lunch', 'Обед'), ('Dinner', 'Обед')]
 GENDER_CHOICES = [('Male', 'Мужской'), ('Female', 'Женский')]
 PATIENT_STATUS_CHOICES = [('Accept', 'Принят'), ('Discharged', 'Выписан')]
-PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся'),('Discharged', 'Выписан')]
-#PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')]  # стоит дополнить
+PATIENT_TYPE_CHOICES = [('Vacationer', 'Отдыхающий'), ('Treating', 'Лечащийся'), ('Discharged', 'Выписан')]
+# PATIENT_GROUP_CHOICES = [('Diabetic', 'Диабетик')]  # стоит дополнить
 NOTIFICATION_STATUS_CHOICES = [('Sended', 'Отправлена'), ('Not Sended', 'Не отправлена')]
 TASK_STATUS_CHOICES = [('Done', 'Сделана'), ('Not done', 'Не сделана')]
 NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
 RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
+MEDPERSONA_POSITION_CHOICES = [('Specialist', 'Специалист по услугам'), ('Doctor', 'Врач')]
+MEDPERSONA_QUALIFICATION_CHOICES = [('0', 'Без категории'), ('1', 'Первая'), ('2', 'Вторая'), ('3', 'Высшая')]
 
 
 class UserManager(BaseUserManager):
@@ -33,7 +35,6 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, name, surname, patronymic, phone_number, role, password=None, photo=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
-
 
         if email is None:
             raise TypeError('Users must have an email address.')
@@ -86,8 +87,7 @@ class Sanatorium(models.Model):
                               blank=False
                               )
 
-
-    phone_number = models.CharField( max_length=17, blank=True)
+    phone_number = models.CharField(max_length=17, blank=True)
     address = models.CharField(verbose_name='Адрес', max_length=20)
 
     class Meta:
@@ -254,15 +254,15 @@ class Patient(models.Model):
     birth_date = models.DateField(verbose_name='Дата рождения', default=date.today)
     gender = models.CharField(verbose_name='Пол', max_length=50, choices=GENDER_CHOICES)
     # РЕГИОН И ГОРОД ПО ЛОГИКЕ ДОЛЖНЫ БЫТЬ ОТДЕЛЬНЫМИ ТАБЛИЦАМИ!!!!!!!
-    region = models.CharField(verbose_name='Город', max_length=30)
-    city = models.CharField(verbose_name='Регион', max_length=30)
+    region = models.CharField(verbose_name='Регион', max_length=30)
+    city = models.CharField(verbose_name='Город', max_length=30)
     receipt_date = models.DateTimeField(verbose_name='Дата поступления', blank=True, default=timezone.now)
 
     # bonus = models.CharField(verbose_name='Бонус', max_length=30)
-    #status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
+    # status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Группа', max_length=50,null=True)
+    group = models.CharField(verbose_name='Группа', max_length=50, null=True)
     complaints = models.TextField(verbose_name='Жалобы при поступлении')
 
     class Meta:
@@ -289,12 +289,14 @@ class Service(models.Model):
 class MedPersona(models.Model):
     user = models.OneToOneField(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     birth_date = models.DateField(verbose_name='Дата рождения')
-    position = models.CharField(verbose_name='Должность', max_length=30)
-    qualification = models.CharField(verbose_name='Квалификация', max_length=30)
-    specialty = models.CharField(verbose_name='Специальность', max_length=30)
+    position = models.CharField(verbose_name='Должность', max_length=30, choices=MEDPERSONA_POSITION_CHOICES)
+    qualification = models.CharField(verbose_name='Квалификация', max_length=30,
+                                     choices=MEDPERSONA_QUALIFICATION_CHOICES)
+    # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
     location = models.IntegerField(verbose_name='Расположение (кабинет)')
-    bibliography = models.TextField(verbose_name='Биография')
+    specilization = models.TextField(verbose_name='Специализация',null=True)
+    education = models.TextField(verbose_name='Образование', null=True)
 
     class Meta:
         verbose_name = 'Мед персона'
