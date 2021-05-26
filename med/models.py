@@ -24,6 +24,7 @@ NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
 RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
 MEDPERSONA_POSITION_CHOICES = [('Specialist', 'Специалист по услугам'), ('Doctor', 'Врач')]
 MEDPERSONA_QUALIFICATION_CHOICES = [('0', 'Без категории'), ('1', 'Первая'), ('2', 'Вторая'), ('3', 'Высшая')]
+SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Обследование', 'Survey')]
 
 
 class UserManager(BaseUserManager):
@@ -87,7 +88,7 @@ class Sanatorium(models.Model):
                               blank=False
                               )
 
-    phone_number = models.CharField(max_length=17, blank=True)
+    phone_number = models.CharField(max_length=18, blank=True)
     address = models.CharField(verbose_name='Адрес', max_length=20)
 
     class Meta:
@@ -180,7 +181,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         Генерирует веб-токен JSON, в котором хранится идентификатор этого
         пользователя, срок действия токена составляет 1 день от создания
         """
-        dt = datetime.now() + timedelta(days=1)
+
+        dt = datetime.now() + timedelta(days=30)
 
         token = jwt.encode({
             'id': self.pk,
@@ -310,6 +312,7 @@ class MedPersona(models.Model):
 class ServiceMedPersona(models.Model):
     service = models.ForeignKey(Service, verbose_name='Услуга', on_delete=models.CASCADE)
     medpersona = models.ForeignKey(MedPersona, verbose_name='Мед персона', on_delete=models.CASCADE)
+    type = models.CharField(verbose_name='Тип', max_length=30, choices=SERVICE_CHOICES)
 
     class Meta:
         verbose_name = 'Услуга-Медперсона'

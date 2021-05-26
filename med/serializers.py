@@ -209,3 +209,12 @@ class PassportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PassportData
         fields = '__all__'
+
+    def create(self, validated_data):
+        return Admin.objects.create(**validated_data)
+
+
+class SanatoriumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sanatorium
+        fields = '__all__'
