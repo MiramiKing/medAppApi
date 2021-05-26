@@ -11,11 +11,6 @@ from med.models import ServiceMedPersona
 
 # Для RecordServiceMedPersona
 def check_service_medpersona(service_id, medpersona_id):
-    if service_id is None:
-        return Response(data={'errors':{'service_id': 'this field is required'}}, status=HTTP_400_BAD_REQUEST)
-    if medpersona_id is None:
-        return Response(data={'errors':{'medpersona_id': 'this field is required'}}, status=HTTP_400_BAD_REQUEST)
-
     # удостовериться, что такая услуга существует
     try:
         service = Service.objects.get(id=service_id)
