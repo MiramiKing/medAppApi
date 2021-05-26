@@ -5,4 +5,12 @@
 venv/
 
 # migration files
-migrations/*
+migrations/
+
+# python bytecode cache files
+__pycache__/
+
+
+# Sublime project files
+*.sublime-project
+*.sublime-workspace
