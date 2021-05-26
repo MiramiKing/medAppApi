@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import authenticate
+from drf_extra_fields.fields import Base64ImageField
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -22,6 +23,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    photo = Base64ImageField()
     # Клиентская сторона не должна иметь возможность отправлять токен вместе с
     # запросом на регистрацию. Сделаем его доступным только на чтение.
     token = serializers.CharField(max_length=255, read_only=True)
@@ -40,7 +42,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
-    username = serializers.CharField(max_length=255, read_only=True)
+
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
     role = serializers.CharField(max_length=255, read_only=True)
@@ -90,7 +92,6 @@ class LoginSerializer(serializers.Serializer):
         # данные, которые передются в т.ч. в методы create и update.
         return {
             'email': user.email,
-            'username': user.username,
             'token': user.token,
             'role': user.role,
         }
@@ -207,4 +208,13 @@ class AdminSerializer(serializers.ModelSerializer):
 class PassportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PassportData
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Admin.objects.create(**validated_data)
+
+
+class SanatoriumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sanatorium
         fields = '__all__'

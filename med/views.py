@@ -64,6 +64,7 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.data
         data.pop('email')
+        #data.pop('username')
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -154,6 +155,7 @@ class PatientAPIView(APIView):
 
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+
 class AdminAPIView(APIView):
     serializer_class = AdminSerializer
     renderer_classes = (JSONRenderer,)
@@ -184,6 +186,7 @@ class AdminAPIView(APIView):
         serializer.save()
 
         return Response(serializer_data, status=status.HTTP_200_OK)
+
 
 class PassportDataAPIView(APIView):
     serializer_class = PassportDataSerializer
@@ -216,3 +219,17 @@ class PassportDataAPIView(APIView):
 
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+
+class SanatoriumView(ListCreateAPIView):
+    queryset = Sanatorium.objects.all()
+    serializer_class = SanatoriumSerializer
+    #renderer_classes = JSONRenderer
+
+    """def perform_create(self, serializer):
+        #serializer_data = self.request.data.get('sanatorium', {})
+        return serializer.save(serializer_data)"""
+
+
+class SingleSanatoriumView(RetrieveUpdateDestroyAPIView):
+    queryset = Sanatorium.objects.all()
+    serializer_class = SanatoriumSerializer

@@ -9,6 +9,8 @@ urlpatterns = [
     path('medpersona', MedPersonaAPIView.as_view()),
     path('patient', PatientAPIView.as_view()),
     path('passport', PassportDataAPIView.as_view()),
-    path('admin',AdminAPIView.as_view())
+    path('admin', AdminAPIView.as_view()),
+    path('sanatorium', SanatoriumView.as_view()),
+    path('sanatorim/<int:pk>', SingleSanatoriumView.as_view()),
 
 ]
