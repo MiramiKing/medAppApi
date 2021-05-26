@@ -7,7 +7,7 @@ from rest_framework.status import *
 from organizer.serializers import *
 from organizer.models import *
 from med.models import ServiceMedPersona
-
+# from organizer import _queryset_
 
 # Для RecordServiceMedPersona
 def check_service_medpersona(service_id, medpersona_id):
@@ -36,6 +36,14 @@ class RecordList(ListCreateAPIView):
     serializer_class = RecordSerializer
     renderer_classes = [JSONRenderer]
 
+    # def list(self, request, *args, **kwargs):
+    #     qs, err = _queryset_.filter(request.query_params, self.queryset)
+    #     if err is not None:
+    #         return Response(data={'errors': {'details': err}}, status=HTTP_400_BAD_REQUEST)
+
+    #     serializer = self.serializer_class(qs.all(), many=True)
+    #     return Response(serializer.data, status=HTTP_200_OK)
+
 
 class RecordDetail(RetrieveUpdateDestroyAPIView):
     queryset = Record.objects.all()
@@ -51,6 +59,15 @@ class RecordServiceList(ListCreateAPIView):
     def get_queryset(self):
         id_list = RecordService.objects.values_list('record__id', flat=True)
         return Record.objects.filter(id__in=id_list)
+
+    # def list(self, request, *args, **kwargs):
+    #     qs, err = _queryset_.filter(request.query_params, self.get_queryset())
+    #     if err is not None:
+    #         return Response(data={'errors': {'details': err}}, status=HTTP_400_BAD_REQUEST)
+        
+    #     serializer = self.serializer_class(qs.all(), many=True)
+    #     return Response(serializer.data, status=HTTP_200_OK)
+
 
     def create(self, request, *args, **kwargs):
         data = JSONParser().parse(request)
@@ -133,6 +150,14 @@ class RecordServiceMedPersonaList(ListCreateAPIView):
     def get_queryset(self):
         id_list = RecordServiceMedPersona.objects.values_list('record_service__record__id', flat=True)
         return Record.objects.filter(id__in=id_list)
+
+    # def list(self, request, *args, **kwargs):
+    #     qs, err = _queryset_.filter(request.query_params, self.get_queryset())
+    #     if err is not None:
+    #         return Response(data={'errors': {'details': err}}, status=HTTP_400_BAD_REQUEST)
+
+    #     serializer = self.serializer_class(qs.all(), many=True)
+    #     return Response(serializer.data, status=HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = JSONParser().parse(request)
