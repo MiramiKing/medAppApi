@@ -64,7 +64,7 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.data
         data.pop('email')
-        #data.pop('username')
+        # data.pop('username')
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -223,13 +223,90 @@ class PassportDataAPIView(APIView):
 class SanatoriumView(ListCreateAPIView):
     queryset = Sanatorium.objects.all()
     serializer_class = SanatoriumSerializer
-    #renderer_classes = JSONRenderer
-
-    """def perform_create(self, serializer):
-        #serializer_data = self.request.data.get('sanatorium', {})
-        return serializer.save(serializer_data)"""
+    renderer_classes = [JSONRenderer]
 
 
 class SingleSanatoriumView(RetrieveUpdateDestroyAPIView):
     queryset = Sanatorium.objects.all()
     serializer_class = SanatoriumSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class TimetableView(ListCreateAPIView):
+    queryset = TimeTable.objects.all()
+    serializer_class = TimeTableSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleTimeTableView(RetrieveUpdateDestroyAPIView):
+    queryset = TimeTable.objects.all()
+    serializer_class = TimeTableSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class ServiceView(ListCreateAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleServiceView(RetrieveUpdateDestroyAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class ServiceMedPersonaView(ListCreateAPIView):
+    queryset = ServiceMedPersona.objects.all()
+    serializer_class = ServiceMedPersonaSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleServiceMedPersonaView(RetrieveUpdateDestroyAPIView):
+    queryset = ServiceMedPersona.objects.all()
+    serializer_class = ServiceMedPersonaSerializer
+    renderer_classes = [JSONRenderer]
+
+class ProcedureView(ListCreateAPIView):
+    queryset = Procedure.objects.all()
+    serializer_class = ProcedureSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleProcedureView(RetrieveUpdateDestroyAPIView):
+    queryset = Procedure.objects.all()
+    serializer_class = ProcedureSerializer
+    renderer_classes = [JSONRenderer]
+
+class SurveyView(ListCreateAPIView):
+    queryset = Survey.objects.all()
+    serializer_class = SurveySerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleSurveyView(RetrieveUpdateDestroyAPIView):
+    queryset = Survey.objects.all()
+    serializer_class = SurveySerializer
+    renderer_classes = [JSONRenderer]
+
+class SpecialityView(ListCreateAPIView):
+    queryset = Speciality.objects.all()
+    serializer_class = SpecialitySerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleSpecialityView(RetrieveUpdateDestroyAPIView):
+    queryset = Speciality.objects.all()
+    serializer_class = SpecialitySerializer
+    renderer_classes = [JSONRenderer]
+
+class EventView(ListCreateAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SingleEventView(RetrieveUpdateDestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    renderer_classes = [JSONRenderer]

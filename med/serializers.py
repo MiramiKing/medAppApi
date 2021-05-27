@@ -164,8 +164,6 @@ class MedPeronaSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    # token = serializers.CharField(max_length=255, read_only=True)
-
     class Meta:
         model = Patient
         # Перечислить все поля, которые могут быть включены в запрос
@@ -185,8 +183,6 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    # token = serializers.CharField(max_length=255, read_only=True)
-
     class Meta:
         model = Admin
         # Перечислить все поля, которые могут быть включены в запрос
@@ -217,4 +213,46 @@ class PassportDataSerializer(serializers.ModelSerializer):
 class SanatoriumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanatorium
+        fields = '__all__'
+
+
+class TimeTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeTable
+        fields = '__all__'
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+
+class ServiceMedPersonaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceMedPersona
+        fields = '__all__'
+
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+
+class SurveySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Survey
+        fields = '__all__'
+
+
+class SpecialitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speciality
+        fields = '__all__'
+
+
+class ProcedureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Procedure
         fields = '__all__'

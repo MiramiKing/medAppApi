@@ -24,7 +24,8 @@ NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
 RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
 MEDPERSONA_POSITION_CHOICES = [('Specialist', 'Специалист по услугам'), ('Doctor', 'Врач')]
 MEDPERSONA_QUALIFICATION_CHOICES = [('0', 'Без категории'), ('1', 'Первая'), ('2', 'Вторая'), ('3', 'Высшая')]
-SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Обследование', 'Survey')]
+SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Survey', 'Обследование'),
+                   ('Event', 'Мероприятие')]
 
 
 class UserManager(BaseUserManager):
@@ -297,7 +298,7 @@ class MedPersona(models.Model):
     # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
     location = models.IntegerField(verbose_name='Расположение (кабинет)', null=True)
-    specilization = models.TextField(verbose_name='Специализация', null=True)
+    specilization = ArrayField(models.CharField(max_length=256), null=True)
     education = models.TextField(verbose_name='Образование', null=True)
 
     class Meta:
@@ -459,10 +460,13 @@ class Translation(models.Model):
         verbose_name_plural = 'Трансляции'
 
 
-class Procedure(Service):
-    photo = models.ImageField(verbose_name='Ключ', upload_to='procedures', null=True)
+class Procedure(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    photo = models.ImageField(verbose_name='Фото', upload_to='procedures', null=True)
     description = models.TextField(verbose_name='Описание')
     сontraindications = models.TextField(verbose_name='Противопоказания')
+    purposes = models.TextField(verbose_name='Назначения')
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
 
     # назначения ??
 
@@ -470,11 +474,34 @@ class Procedure(Service):
         verbose_name = 'Процедура'
         verbose_name_plural = 'Процедуры'
 
+class Speciality(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    # назначения ??
 
-class Survey(Service):
+    class Meta:
+        verbose_name = 'Специальность'
+        verbose_name_plural = 'Специальности'
+
+class Event(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    photo = models.ImageField(verbose_name='Фото', upload_to='events', null=True)
+    description = models.TextField(verbose_name='Содержание')
+    сontraindications = models.TextField(verbose_name='Противопоказания')
+    begin_data = models.DateTimeField(verbose_name='Дата начала')
+    end_data = models.DateTimeField(verbose_name='Дата окончания')
+    # назначения ??
+
+    class Meta:
+        verbose_name = 'Мероприятие'
+        verbose_name_plural = 'Мероприятия'
+
+
+class Survey(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     description = models.TextField(verbose_name='Описание')
     purposes = models.TextField(verbose_name='Назначения')
     photo = models.ImageField(verbose_name='Фото', upload_to='surveys', null=True)
+    placement = models.CharField(verbose_name='Расположение',max_length=50)
 
     class Meta:
         verbose_name = 'Обследовние'
