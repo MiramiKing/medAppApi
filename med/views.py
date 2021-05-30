@@ -29,7 +29,7 @@ class UserProfileListCreateView(ListCreateAPIView):
 class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    renderer_classes = (JSONRenderer,)
+    renderer_classes = (UserJSONRenderer,)
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
 
 
