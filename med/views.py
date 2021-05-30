@@ -68,6 +68,26 @@ class LoginAPIView(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
+class MedPersobaListCreateView(ListCreateAPIView):
+    queryset = MedPersona.objects.all()
+    serializer_class = MedPeronaSerializer
+    permission_classes = [IsAuthenticated]
+
+
+
+class PatientListCreateView(ListCreateAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+    permission_classes = [IsAuthenticated]
+
+
+
+class AdminListCreateView(ListCreateAPIView):
+    queryset = Admin.objects.all()
+    serializer_class = AdminSerializer
+    permission_classes = [IsAuthenticated]
+
+
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
