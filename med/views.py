@@ -30,6 +30,21 @@ class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
 
+class PatientDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+
+class AdminProfileDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Admin.objects.all()
+    serializer_class = AdminSerializer
+    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+
+class MedPersonaDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = MedPersona.objects.all()
+    serializer_class = MedPersona
+    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+
 
 class RegistrationAPIView(APIView):
     permission_classes = (AllowAny,)
