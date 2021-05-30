@@ -22,6 +22,10 @@ class UserProfileListCreateView(ListCreateAPIView):
 
     renderer_classes = (JSONRenderer,)
 
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
         user = self.request.user
         serializer.save(user=user)
@@ -32,6 +36,15 @@ class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserProfileSerializer
     renderer_classes = (UserJSONRenderer,)
     permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        # Здесь нечего валидировать или сохранять. Мы просто хотим, чтобы
+        # сериализатор обрабатывал преобразования объекта User во что-то, что
+        # можно привести к json и вернуть клиенту.
+        user = get_object_or_404(UserProfile, id=kwargs['pk'])
+        serializer = self.serializer_class(user)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PatientDetailView(RetrieveUpdateDestroyAPIView):
