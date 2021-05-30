@@ -208,7 +208,7 @@ class PassportDataSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        return Admin.objects.create(**validated_data)
+        return PassportData.objects.create(**validated_data)
 
 
 class SanatoriumSerializer(serializers.ModelSerializer):
