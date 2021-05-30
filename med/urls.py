@@ -19,7 +19,7 @@ urlpatterns = [
     path('passport', PassportDataAPIView.as_view()),
     path('admin', AdminAPIView.as_view()),
     path('sanatorium', SanatoriumView.as_view()),
-    path('sanatorim/<int:pk>', SingleSanatoriumView.as_view()),
+    path('sanatorium/<int:pk>', SingleSanatoriumView.as_view()),
     path('timetable', TimetableView.as_view()),
     path('timetable/<int:pk>', SingleTimeTableView.as_view()),
     path('service', ServiceView.as_view()),
