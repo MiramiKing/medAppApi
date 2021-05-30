@@ -108,6 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
+    photo = Base64ImageField()
 
     # photo = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
 
