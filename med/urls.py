@@ -9,7 +9,7 @@ urlpatterns = [
     path('patients', PatientListCreateView.as_view()),
     path('medics', MedPersobaListCreateView.as_view()),
     path('admins', AdminListCreateView.as_view()),
-    path('users/<int:pk>', UserRetrieveUpdateAPIView.as_view()),
+    path('users/<int:pk>', UserProfileDetailView.as_view()),
     path('patients/<int:pk>', PatientDetailView.as_view()),
     path('medics/<int:pk>', MedPersonaDetailView.as_view()),
     path('admins/<int:pk>', AdminProfileDetailView.as_view()),
