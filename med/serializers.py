@@ -6,6 +6,11 @@ from drf_extra_fields.fields import Base64ImageField
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    password = password = serializers.CharField(
+        max_length=128,
+        min_length=8,
+        write_only=True
+    )
 
     class Meta:
         model = UserProfile
