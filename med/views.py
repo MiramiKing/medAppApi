@@ -19,6 +19,7 @@ class UserProfileListCreateView(ListCreateAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
+
     renderer_classes = (JSONRenderer,)
 
     def perform_create(self, serializer):
@@ -29,29 +30,29 @@ class UserProfileListCreateView(ListCreateAPIView):
 class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    #renderer_classes = (UserJSONRenderer,)
-    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+    renderer_classes = (UserJSONRenderer,)
+    permission_classes = [IsAuthenticated]
 
 
 class PatientDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     renderer_classes = (JSONRenderer,)
-    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class AdminProfileDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Admin.objects.all()
     serializer_class = AdminSerializer
     renderer_classes = (JSONRenderer,)
-    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class MedPersonaDetailView(RetrieveUpdateDestroyAPIView):
     queryset = MedPersona.objects.all()
     serializer_class = MedPersona
     renderer_classes = (JSONRenderer,)
-    permission_classes = [IsOwnerProfileOrReadOnly, IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class RegistrationAPIView(APIView):
@@ -116,7 +117,7 @@ class AdminListCreateView(ListCreateAPIView):
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
-    #renderer_classes = (JSONRenderer,)
+    # renderer_classes = (JSONRenderer,)
     serializer_class = UserSerializer
 
     def retrieve(self, request, *args, **kwargs):
