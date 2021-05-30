@@ -11,7 +11,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
-    photo = Base64ImageField()
+
     class Meta:
         model = UserProfile
         fields = '__all__'
