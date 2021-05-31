@@ -278,6 +278,17 @@ class PassportDataAPIView(APIView):
 
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+class PassportDataView(ListCreateAPIView):
+    queryset = PassportData.objects.all()
+    serializer_class = PassportDataSerializer
+    renderer_classes = [JSONRenderer]
+
+
+class SinglePassportDataView(RetrieveUpdateDestroyAPIView):
+    queryset = PassportData.objects.all()
+    serializer_class = PatientSerializer
+    renderer_classes = [JSONRenderer]
+
 
 class SanatoriumView(ListCreateAPIView):
     queryset = Sanatorium.objects.all()
