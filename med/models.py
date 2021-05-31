@@ -265,7 +265,7 @@ class Patient(models.Model):
     # status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Группа', max_length=50, null=True)
+    group = ArrayField(models.CharField(verbose_name='Группа', max_length=50), null=True)
     complaints = models.TextField(verbose_name='Жалобы при поступлении')
 
     class Meta:
@@ -474,13 +474,16 @@ class Procedure(models.Model):
         verbose_name = 'Процедура'
         verbose_name_plural = 'Процедуры'
 
+
 class Speciality(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+
     # назначения ??
 
     class Meta:
         verbose_name = 'Специальность'
         verbose_name_plural = 'Специальности'
+
 
 class Event(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
@@ -489,6 +492,7 @@ class Event(models.Model):
     сontraindications = models.TextField(verbose_name='Противопоказания')
     begin_data = models.DateTimeField(verbose_name='Дата начала')
     end_data = models.DateTimeField(verbose_name='Дата окончания')
+
     # назначения ??
 
     class Meta:
@@ -501,7 +505,7 @@ class Survey(models.Model):
     description = models.TextField(verbose_name='Описание')
     purposes = models.TextField(verbose_name='Назначения')
     photo = models.ImageField(verbose_name='Фото', upload_to='surveys', null=True)
-    placement = models.CharField(verbose_name='Расположение',max_length=50)
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
 
     class Meta:
         verbose_name = 'Обследовние'
