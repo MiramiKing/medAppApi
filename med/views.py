@@ -278,6 +278,20 @@ class PassportDataAPIView(APIView):
 
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+class PassportDataAPIView2(APIView):
+    serializer_class = PassportDataSerializer
+    renderer_classes = (JSONRenderer,)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.data.get('user', {})
+        passport = get_object_or_404(PassportData, user=user_id)
+        serializer = self.serializer_class(passport)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
 class PassportDataView(ListCreateAPIView):
     queryset = PassportData.objects.all()
     serializer_class = PassportDataSerializer
