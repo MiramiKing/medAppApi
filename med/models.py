@@ -101,7 +101,7 @@ class Sanatorium(models.Model):
 
 
 class TimeTable(models.Model):
-    dates = ArrayField(models.DateField())
+    dates = ArrayField(models.DateTimeField())
 
     class Meta:
         verbose_name = 'Расписание'

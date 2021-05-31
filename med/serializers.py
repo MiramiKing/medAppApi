@@ -241,12 +241,16 @@ class ServiceMedPersonaSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False)
+
     class Meta:
         model = Event
         fields = '__all__'
 
 
 class SurveySerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False)
+
     class Meta:
         model = Survey
         fields = '__all__'
@@ -259,6 +263,8 @@ class SpecialitySerializer(serializers.ModelSerializer):
 
 
 class ProcedureSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False)
+
     class Meta:
         model = Procedure
         fields = '__all__'

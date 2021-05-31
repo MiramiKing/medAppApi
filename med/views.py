@@ -332,11 +332,21 @@ class ProcedureView(ListCreateAPIView):
     serializer_class = ProcedureSerializer
     renderer_classes = [JSONRenderer]
 
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SingleProcedureView(RetrieveUpdateDestroyAPIView):
     queryset = Procedure.objects.all()
     serializer_class = ProcedureSerializer
     renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        procedure = get_object_or_404(Procedure, id=kwargs['pk'])
+        serializer = self.serializer_class(procedure)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SurveyView(ListCreateAPIView):
@@ -344,11 +354,21 @@ class SurveyView(ListCreateAPIView):
     serializer_class = SurveySerializer
     renderer_classes = [JSONRenderer]
 
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SingleSurveyView(RetrieveUpdateDestroyAPIView):
     queryset = Survey.objects.all()
     serializer_class = SurveySerializer
     renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        survey = get_object_or_404(Survey, id=kwargs['pk'])
+        serializer = self.serializer_class(survey)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SpecialityView(ListCreateAPIView):
@@ -368,8 +388,18 @@ class EventView(ListCreateAPIView):
     serializer_class = EventSerializer
     renderer_classes = [JSONRenderer]
 
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SingleEventView(RetrieveUpdateDestroyAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        event = get_object_or_404(Event, id=kwargs['pk'])
+        serializer = self.serializer_class(event)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
