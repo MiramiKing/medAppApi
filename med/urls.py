@@ -3,9 +3,9 @@ from django.urls import include, path
 from .views import *
 
 urlpatterns = [
-    path('registration', RegistrationAPIView.as_view()),
-    path('users/login', LoginAPIView.as_view()),
-    path('users', UserProfileListCreateView.as_view()),
+    path('registration', RegistrationAPIView.as_view()),# post регистрация
+    path('users/login', LoginAPIView.as_view()), # post вход
+    path('users', UserProfileListCreateView.as_view()), #
     path('patients', PatientListCreateView.as_view()),
     path('medics', MedPersobaListCreateView.as_view()),
     path('admins', AdminListCreateView.as_view()),

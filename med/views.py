@@ -18,7 +18,7 @@ from rest_framework.renderers import JSONRenderer
 class UserProfileListCreateView(ListCreateAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsUserAdmin]
 
     renderer_classes = (JSONRenderer,)
 
@@ -283,18 +283,17 @@ class PassportDataAPIView(APIView):
 
         return Response(serializer_data, status=status.HTTP_200_OK)
 
+
 class PassportDataAPIView2(APIView):
     serializer_class = PassportDataSerializer
     renderer_classes = (JSONRenderer,)
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-
         passport = get_object_or_404(PassportData, user=kwargs['pk'])
         serializer = self.serializer_class(passport)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 
 class PassportDataView(ListCreateAPIView):

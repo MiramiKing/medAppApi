@@ -35,7 +35,7 @@ class UserManager(BaseUserManager):
     же самого кода, который Django использовал для создания User (для демонстрации).
     """
 
-    def create_user(self, email, name, surname, patronymic, phone_number, role, password=None, photo=None):
+    def create_user(self, email, name, surname, phone_number, role, patronymic=None, password=None, photo=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
 
         if email is None:
@@ -90,7 +90,7 @@ class Sanatorium(models.Model):
                               )
 
     phone_number = models.CharField(max_length=18, blank=True)
-    address = models.CharField(verbose_name='Адрес', max_length=20)
+    address = models.CharField(verbose_name='Адрес', max_length=100)
 
     class Meta:
         verbose_name = 'Санаторий'
@@ -132,10 +132,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.
     role = models.CharField(verbose_name='Роль', max_length=50, choices=ROLES_CHOICES)
-    name = models.CharField(verbose_name='Имя', max_length=30, null=True)
-    surname = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
-    patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
-    photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
+    name = models.CharField(verbose_name='Имя', max_length=30)
+    surname = models.CharField(verbose_name='Фамилия', max_length=30)
+    patronymic = models.CharField(verbose_name='Отчество', max_length=30, blank=True)
+    photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True, blank=True)
 
     phone_number = models.CharField(max_length=18, blank=True)
 
@@ -164,6 +164,9 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         возможным. token называется "динамическим свойством".
         """
         return self._generate_jwt_token()
+
+    def get_name(self):
+        return self.name + ' ' + self.surname + ' ' + self.patronymic if self.patronymic else ''
 
     def get_full_name(self):
         """
@@ -248,8 +251,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic if self.user.patronymic else ''
-        return name
+        return self.user.get_name()
 
 
 class Patient(models.Model):
@@ -265,16 +267,15 @@ class Patient(models.Model):
     # status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = ArrayField(models.CharField(verbose_name='Группа', max_length=50), null=True)
-    complaints = models.TextField(verbose_name='Жалобы при поступлении')
+    group = ArrayField(models.CharField(verbose_name='Группа', max_length=50), blank=True)
+    complaints = models.TextField(verbose_name='Жалобы при поступлении', default='Нет жалоб')
 
     class Meta:
         verbose_name = 'Пациент'
         verbose_name_plural = 'Пациенты'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
     # TODO Регионы и города
 
 
@@ -298,16 +299,15 @@ class MedPersona(models.Model):
     # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
     location = models.IntegerField(verbose_name='Расположение (кабинет)', null=True)
-    specilization = ArrayField(models.CharField(max_length=256), null=True)
-    education = models.TextField(verbose_name='Образование', null=True)
+    specilization = ArrayField(models.CharField(max_length=256), blank=True)
+    education = models.TextField(verbose_name='Образование', blank=True)
 
     class Meta:
         verbose_name = 'Мед персона'
         verbose_name_plural = 'Мед персоны'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
 
 
 class ServiceMedPersona(models.Model):
@@ -321,7 +321,7 @@ class ServiceMedPersona(models.Model):
 
 
 class Medcard(models.Model):
-    patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
+    patient = models.OneToOneField(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
     height = models.IntegerField(verbose_name='Рост')
     # расписание занятий ??
     allergies = ArrayField(models.CharField(max_length=256))
@@ -358,8 +358,7 @@ class PassportData(models.Model):
         verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
 
 
 # Опрос/Анкета должна перейти в две таблицы Вопрос и Анкета - где Анкета будет содеражть список Вопросов
@@ -443,6 +442,7 @@ class Article(models.Model):
 
 
 class Translation(models.Model):
+    sanatorium = models.OneToOneField(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
     heading = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     created = models.DateTimeField(editable=False, verbose_name='Дата создания')

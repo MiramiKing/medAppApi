@@ -28,7 +28,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
-    photo = Base64ImageField(required=False)
+    photo = Base64ImageField(required=False, allow_null=True)
     # Клиентская сторона не должна иметь возможность отправлять токен вместе с
     # запросом на регистрацию. Сделаем его доступным только на чтение.
     token = serializers.CharField(max_length=255, read_only=True)
