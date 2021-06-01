@@ -365,6 +365,12 @@ class ProcedureView(ListCreateAPIView):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SingleProcedureView(RetrieveUpdateDestroyAPIView):
     queryset = Procedure.objects.all()
@@ -385,6 +391,12 @@ class SurveyView(ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -420,6 +432,13 @@ class EventView(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class SingleEventView(RetrieveUpdateDestroyAPIView):
