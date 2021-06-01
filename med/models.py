@@ -280,6 +280,9 @@ class Service(models.Model):
         verbose_name = 'Услуга'
         verbose_name_plural = 'Услуги'
 
+    def __str__(self):
+        return self.name
+
 
 class TimeTable(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE)
@@ -464,8 +467,9 @@ class Procedure(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     photo = models.ImageField(verbose_name='Фото', upload_to='procedures', null=True)
     description = models.TextField(verbose_name='Описание')
-    сontraindications = models.TextField(verbose_name='Противопоказания')
-    purposes = models.TextField(verbose_name='Назначения')
+    contraindications = ArrayField(models.CharField(verbose_name='Противопоказания', max_length=256), null=True,
+                                   blank=True)
+    purposes = ArrayField(models.CharField(verbose_name='Назначения', max_length=256), null=True, blank=True)
     placement = models.CharField(verbose_name='Расположение', max_length=50)
 
     # назначения ??
@@ -489,10 +493,9 @@ class Event(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     photo = models.ImageField(verbose_name='Фото', upload_to='events', null=True)
     description = models.TextField(verbose_name='Содержание')
-    сontraindications = models.TextField(verbose_name='Противопоказания')
-    begin_data = models.DateTimeField(verbose_name='Дата начала')
-    end_data = models.DateTimeField(verbose_name='Дата окончания')
-
+    begin_data = models.DateField(verbose_name='Дата начала')
+    end_data = models.DateField(verbose_name='Дата окончания', null=True, blank=True)
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
     # назначения ??
 
     class Meta:
@@ -503,7 +506,7 @@ class Event(models.Model):
 class Survey(models.Model):
     service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     description = models.TextField(verbose_name='Описание')
-    purposes = models.TextField(verbose_name='Назначения')
+    purposes = ArrayField(models.CharField(verbose_name='Назначения', max_length=256), null=True, blank=True)
     photo = models.ImageField(verbose_name='Фото', upload_to='surveys', null=True)
     placement = models.CharField(verbose_name='Расположение', max_length=50)
 
