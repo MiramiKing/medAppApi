@@ -101,7 +101,7 @@ class Sanatorium(models.Model):
 
 
 class TimeTable(models.Model):
-    dates = ArrayField(models.DateTimeField())
+    dates = ArrayField(models.DateTimeField(),null=True)
 
     class Meta:
         verbose_name = 'Расписание'
@@ -282,7 +282,7 @@ class Patient(models.Model):
 class Service(models.Model):
     sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
     timetable = models.OneToOneField(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name='Название')
+    name = models.CharField(max_length=255, verbose_name='Название',unique=True)
     cost = models.FloatField(verbose_name='Стоимость')
 
     class Meta:
