@@ -46,6 +46,11 @@ class UserProfileDetailView(RetrieveUpdateDestroyAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def delete(self, request, *args, **kwargs):
+        user = get_object_or_404(UserProfile, id=kwargs['pk'])
+        user.delete()
+        return Response(status=status.HTTP_200_OK)
+
 
 class PatientDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
