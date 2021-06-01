@@ -13,6 +13,7 @@ urlpatterns = [
     path('passports/<int:pk>', SinglePassportDataView.as_view()),
     path('users/<int:pk>', UserProfileDetailView.as_view()),
     path('patients/<int:pk>', PatientDetailView.as_view()),
+    path('users/patients/<int:pk>/medcard',MedCardView.as_view()),
     path('medics/<int:pk>', MedPersonaDetailView.as_view()),
     path('admins/<int:pk>', AdminProfileDetailView.as_view()),
     path('user', UserRetrieveUpdateAPIView.as_view()),

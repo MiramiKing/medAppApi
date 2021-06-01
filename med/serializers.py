@@ -268,3 +268,9 @@ class ProcedureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Procedure
         fields = '__all__'
+
+
+class MedcardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medcard
+        fields = '__all__'

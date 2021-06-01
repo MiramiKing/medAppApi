@@ -432,3 +432,37 @@ class SingleEventView(RetrieveUpdateDestroyAPIView):
         serializer = self.serializer_class(event)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MedCardView(CreateAPIView, RetrieveUpdateAPIView):
+    queryset = Medcard.objects.all()
+    serializer_class = MedcardSerializer
+    renderer_classes = [JSONRenderer]
+
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        patient = get_object_or_404(Patient, id=kwargs['pk'])
+        medcard = get_object_or_404(Medcard, patient=patient)
+        serializer = self.serializer_class(medcard)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        patient = get_object_or_404(Patient, id=kwargs['pk'])
+        data = request.data
+        data["patient"] = patient.pk
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        patient = get_object_or_404(Patient, id=kwargs['pk'])
+        medcard = get_object_or_404(Medcard, patient=patient)
+        serializer = self.serializer_class(medcard,data=request.data,partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
