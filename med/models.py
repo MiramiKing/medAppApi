@@ -100,14 +100,6 @@ class Sanatorium(models.Model):
         return self.name
 
 
-class TimeTable(models.Model):
-    dates = ArrayField(models.DateTimeField(),null=True)
-
-    class Meta:
-        verbose_name = 'Расписание'
-        verbose_name_plural = 'Расписания'
-
-
 class UserProfile(AbstractBaseUser, PermissionsMixin):
     # username = models.CharField(db_index=True, max_length=255, unique=True)
     email = models.EmailField(db_index=True, unique=True)
@@ -280,14 +272,22 @@ class Patient(models.Model):
 
 
 class Service(models.Model):
-    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
-    timetable = models.OneToOneField(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name='Название',unique=True)
+    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=255, verbose_name='Название', unique=True)
     cost = models.FloatField(verbose_name='Стоимость')
 
     class Meta:
         verbose_name = 'Услуга'
         verbose_name_plural = 'Услуги'
+
+
+class TimeTable(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    dates = ArrayField(models.DateTimeField(), null=True)
+
+    class Meta:
+        verbose_name = 'Расписание'
+        verbose_name_plural = 'Расписания'
 
 
 class MedPersona(models.Model):
