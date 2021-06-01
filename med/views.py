@@ -289,8 +289,8 @@ class PassportDataAPIView2(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user_id = request.data.get('user', {})
-        passport = get_object_or_404(PassportData, user=user_id)
+
+        passport = get_object_or_404(PassportData, user=kwargs['pk'])
         serializer = self.serializer_class(passport)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
