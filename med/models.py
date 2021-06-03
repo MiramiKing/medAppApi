@@ -41,7 +41,7 @@ class UserManager(BaseUserManager):
         if email is None:
             raise TypeError('Users must have an email address.')
 
-        if password is None or not self.cleaned_data.get("password", None):
+        if password is None:
             raise TypeError('Users must have a password.')
 
         user = self.model(email=self.normalize_email(email), name=name,
