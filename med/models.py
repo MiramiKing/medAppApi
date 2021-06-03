@@ -41,12 +41,14 @@ class UserManager(BaseUserManager):
         if email is None:
             raise TypeError('Users must have an email address.')
 
-        if password is None:
+        if password is None or not self.cleaned_data.get("password", None):
             raise TypeError('Users must have a password.')
 
         user = self.model(email=self.normalize_email(email), name=name,
                           surname=surname, patronymic=patronymic, phone_number=phone_number, role=role,
                           password=password, photo=photo)
+        if not password:
+            user.set_password(self.cleaned_data["password"])
         user.set_password(password)
         user.save()
 
@@ -301,9 +303,9 @@ class MedPersona(models.Model):
                                      choices=MEDPERSONA_QUALIFICATION_CHOICES)
     # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
-    location = models.IntegerField(verbose_name='Расположение (кабинет)', null=True)
-    specilization = ArrayField(models.CharField(max_length=256), blank=True)
-    education = models.TextField(verbose_name='Образование', blank=True)
+    location = models.CharField(verbose_name='Расположение (кабинет)', max_length=256, null=True, blank=True)
+    specialization = models.TextField(blank=True, null=True, verbose_name='Специализация')
+    education = ArrayField(models.TextField(), verbose_name='Образование', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Мед персона'
@@ -496,6 +498,7 @@ class Event(models.Model):
     begin_data = models.DateField(verbose_name='Дата начала')
     end_data = models.DateField(verbose_name='Дата окончания', null=True, blank=True)
     placement = models.CharField(verbose_name='Расположение', max_length=50)
+
     # назначения ??
 
     class Meta:
