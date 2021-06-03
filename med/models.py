@@ -325,10 +325,10 @@ class ServiceMedPersona(models.Model):
 
 class Medcard(models.Model):
     patient = models.OneToOneField(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
-    height = models.IntegerField(verbose_name='Рост')
+    height = models.IntegerField(verbose_name='Рост', null=True, blank=True)
     # расписание занятий ??
-    allergies = ArrayField(models.CharField(max_length=256))
-    rsk = models.IntegerField(verbose_name='Рекомендуемая суточная норма калорий')
+    allergies = ArrayField(models.CharField(max_length=256, blank=True), default=list, blank=True)
+    rsk = models.IntegerField(verbose_name='Рекомендуемая суточная норма калорий', null=True, blank=True)
     complaints = models.TextField(verbose_name='Жалобы', help_text='Общие субъективные жалобы')
 
     class Meta:
