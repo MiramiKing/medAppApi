@@ -29,6 +29,7 @@ urlpatterns = [
     path('service', ServiceView.as_view()),
     path('service/<int:pk>', SingleServiceView.as_view()),
     path('servicemedper', ServiceMedPersonaView.as_view()),
+    path('servicemedper/', ServiceMedPersonaViewByIdIn.as_view()),
     path('servicemedper/<int:pk>', SingleServiceMedPersonaView.as_view()),
     path('procedure', ProcedureView.as_view()),
     path('procedure/<int:pk>', SingleProcedureView.as_view()),

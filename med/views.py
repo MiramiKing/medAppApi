@@ -5,7 +5,6 @@ from rest_framework.generics import (ListCreateAPIView, RetrieveUpdateDestroyAPI
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.serializers import ModelSerializer
-
 from medAppApi.license import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -358,6 +357,26 @@ class ServiceMedPersonaView(ListCreateAPIView):
     queryset = ServiceMedPersona.objects.all()
     serializer_class = ServiceMedPersonaSerializer
     renderer_classes = [JSONRenderer]
+
+
+class ServiceMedPersonaViewByIdIn(APIView):
+    serializer_class = ServiceMedPersonaSerializer
+    renderer_classes = [JSONRenderer]
+
+    def post(self, request):
+        medpersona = request.data.get('medpersona', {})
+        if not medpersona:
+            service = request.data.get('service', {})
+            if not service:
+                return Response({'errors': {'medpersona or service id does not exist'}},
+                                status=status.HTTP_400_BAD_REQUEST)
+            servicemedper = get_object_or_404(ServiceMedPersona, service=service)
+            serializer = self.serializer_class(servicemedper)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            servicemedper = get_object_or_404(ServiceMedPersona, medpersona=medpersona)
+            serializer = self.serializer_class(servicemedper)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SingleServiceMedPersonaView(RetrieveUpdateDestroyAPIView):
