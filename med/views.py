@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView,
@@ -293,7 +294,7 @@ class PassportDataAPIView(APIView):
         return Response(serializer_data, status=status.HTTP_200_OK)
 
 
-class PassportDataAPIView2(APIView):
+class PassportDataByUserAPIView(APIView):
     serializer_class = PassportDataSerializer
     renderer_classes = (JSONRenderer,)
     permission_classes = [IsAuthenticated]
@@ -400,6 +401,32 @@ class SingleServiceMedPersonaView(RetrieveUpdateDestroyAPIView):
     renderer_classes = [JSONRenderer]
 
 
+class ServiceMedPersonaByServiceView(ListCreateAPIView):
+    queryset = ServiceMedPersona.objects.all()
+    serializer_class = ServiceMedPersonaSerializer
+    renderer_classes = (JSONRenderer,)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        servicemedpers = ServiceMedPersona.objects.filter(service=kwargs['service'])
+        serializer = self.serializer_class(servicemedpers, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ServiceMedPersonaByMedicView(ListCreateAPIView):
+    queryset = ServiceMedPersona.objects.all()
+    serializer_class = ServiceMedPersonaSerializer
+    renderer_classes = (JSONRenderer,)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        servicemedpers = ServiceMedPersona.objects.filter(medpersona=kwargs['pk'])
+        serializer = self.serializer_class(servicemedpers, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ProcedureView(ListCreateAPIView):
     queryset = Procedure.objects.all()
     serializer_class = ProcedureSerializer
@@ -423,6 +450,18 @@ class SingleProcedureView(RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         procedure = get_object_or_404(Procedure, id=kwargs['pk'])
+        serializer = self.serializer_class(procedure)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SingleProcedureViewByService(RetrieveUpdateDestroyAPIView):
+    queryset = Procedure.objects.all()
+    serializer_class = ProcedureSerializer
+    renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        procedure = get_object_or_404(Procedure, service=kwargs['pk'])
         serializer = self.serializer_class(procedure)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -456,6 +495,18 @@ class SingleSurveyView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class SingleSurveyViewByService(RetrieveUpdateDestroyAPIView):
+    queryset = Survey.objects.all()
+    serializer_class = SurveySerializer
+    renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        survey = get_object_or_404(Survey, service=kwargs['service'])
+        serializer = self.serializer_class(survey)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class SpecialityView(ListCreateAPIView):
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
@@ -466,6 +517,18 @@ class SingleSpecialityView(RetrieveUpdateDestroyAPIView):
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
     renderer_classes = [JSONRenderer]
+
+
+class SingleSpecialityViewByService(RetrieveUpdateDestroyAPIView):
+    queryset = Speciality.objects.all()
+    serializer_class = SpecialitySerializer
+    renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        speciality = get_object_or_404(Speciality, service=kwargs['service'])
+        serializer = self.serializer_class(speciality)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class EventView(ListCreateAPIView):
@@ -491,6 +554,18 @@ class SingleEventView(RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         event = get_object_or_404(Event, id=kwargs['pk'])
+        serializer = self.serializer_class(event)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SingleEventViewByService(RetrieveUpdateDestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        event = get_object_or_404(Event, service=kwargs['service'])
         serializer = self.serializer_class(event)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -241,11 +241,13 @@ class ServiceMedPersonaSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    photo = Base64ImageField(required=False)
+    photo = Base64ImageField(required=False,use_url=True)
 
     class Meta:
         model = Event
         fields = '__all__'
+
+
 
 
 class SurveySerializer(serializers.ModelSerializer):
