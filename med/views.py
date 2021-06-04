@@ -408,7 +408,7 @@ class ServiceMedPersonaByServiceView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        servicemedpers = ServiceMedPersona.objects.filter(service=kwargs['service'])
+        servicemedpers = ServiceMedPersona.objects.filter(service=kwargs['pk'])
         serializer = self.serializer_class(servicemedpers, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -501,7 +501,7 @@ class SingleSurveyViewByService(RetrieveUpdateDestroyAPIView):
     renderer_classes = [JSONRenderer]
 
     def retrieve(self, request, *args, **kwargs):
-        survey = get_object_or_404(Survey, service=kwargs['service'])
+        survey = get_object_or_404(Survey, service=kwargs['pk'])
         serializer = self.serializer_class(survey)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -525,7 +525,7 @@ class SingleSpecialityViewByService(RetrieveUpdateDestroyAPIView):
     renderer_classes = [JSONRenderer]
 
     def retrieve(self, request, *args, **kwargs):
-        speciality = get_object_or_404(Speciality, service=kwargs['service'])
+        speciality = get_object_or_404(Speciality, service=kwargs['pk'])
         serializer = self.serializer_class(speciality)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -565,7 +565,7 @@ class SingleEventViewByService(RetrieveUpdateDestroyAPIView):
     renderer_classes = [JSONRenderer]
 
     def retrieve(self, request, *args, **kwargs):
-        event = get_object_or_404(Event, service=kwargs['service'])
+        event = get_object_or_404(Event, service=kwargs['pk'])
         serializer = self.serializer_class(event)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
