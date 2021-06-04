@@ -378,6 +378,21 @@ class ServiceMedPersonaViewByIdIn(APIView):
             serializer = self.serializer_class(servicemedper, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def post(self, request):
+        medpersona = request.data.get('medpersona', {})
+        if not medpersona:
+            service = request.data.get('service', {})
+            if not service:
+                return Response({'errors': {'medpersona or service id does not exist'}},
+                                status=status.HTTP_400_BAD_REQUEST)
+            servicemedper = ServiceMedPersona.objects.filter(service=service)
+            serializer = self.serializer_class(servicemedper, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            servicemedper = ServiceMedPersona.objects.filter(medpersona=medpersona)
+            serializer = self.serializer_class(servicemedper, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SingleServiceMedPersonaView(RetrieveUpdateDestroyAPIView):
     queryset = ServiceMedPersona.objects.all()
