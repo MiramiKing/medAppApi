@@ -68,7 +68,7 @@ class AdminProfileDetailView(RetrieveUpdateDestroyAPIView):
 
 class MedPersonaDetailView(RetrieveUpdateDestroyAPIView):
     queryset = MedPersona.objects.all()
-    serializer_class = MedPersona
+    serializer_class = MedPeronaSerializer
     renderer_classes = (JSONRenderer,)
     permission_classes = [IsAuthenticated]
 
@@ -147,6 +147,16 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
+        serializer_data = request.data.get('user', {})
+
+        # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
+        serializer = self.serializer_class(request.user, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer_data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
         serializer_data = request.data.get('user', {})
 
         # Паттерн сериализации, валидирования и сохранения - то, о чем говорили
@@ -440,7 +450,6 @@ class EventView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 class SingleEventView(RetrieveUpdateDestroyAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -480,7 +489,7 @@ class MedCardView(CreateAPIView, RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         patient = get_object_or_404(Patient, id=kwargs['pk'])
         medcard = get_object_or_404(Medcard, patient=patient)
-        serializer = self.serializer_class(medcard,data=request.data,partial=True)
+        serializer = self.serializer_class(medcard, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
