@@ -313,7 +313,7 @@ class PassportDataView(ListCreateAPIView):
 
 class SinglePassportDataView(RetrieveUpdateDestroyAPIView):
     queryset = PassportData.objects.all()
-    serializer_class = PatientSerializer
+    serializer_class = PassportDataSerializer
     renderer_classes = [JSONRenderer]
 
 
