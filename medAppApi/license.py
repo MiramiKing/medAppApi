@@ -10,21 +10,14 @@ class IsOwnerProfileOrReadOnly(BasePermission):
 
 class IsUserPatient(BasePermission):
     def has_permission(self, request, view):
-        if request.user.role == 'Patient':
-            return True
-        return False
+        return request.user.role == 'Patient'
+
 
 class IsUserMedic(BasePermission):
     def has_permission(self, request, view):
-        if request.user.role == 'Doctor':
-            return True
-        return False
+        return request.user.role == 'Doctor'
 
 
 class IsUserAdmin(BasePermission):
     def has_permission(self, request, view):
-        if request.user.role == 'Admin':
-            return True
-        return False
-
-
+        return request.user.role == 'Admin'

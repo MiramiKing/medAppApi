@@ -11,6 +11,8 @@ class UserJSONRenderer(JSONRenderer):
         # быть аутентифицирован), data будет содержать ключ error. Мы хотим,
         # чтобы стандартный JSONRenderer обрабатывал такие ошибки, поэтому
         # такой случай необходимо проверить.
+        if not data:
+            return super(UserJSONRenderer, self).render(data)
         errors = data.get('errors', None)
 
         # Если мы получим ключ token как часть ответа, это будет байтовый

@@ -1,10 +1,16 @@
 from rest_framework import serializers
 from .models import *
 from django.contrib.auth import authenticate
+from drf_extra_fields.fields import Base64ImageField
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    password = password = serializers.CharField(
+        max_length=128,
+        min_length=8,
+        write_only=True
+    )
 
     class Meta:
         model = UserProfile
@@ -22,6 +28,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    photo = Base64ImageField(required=False, allow_null=True)
     # Клиентская сторона не должна иметь возможность отправлять токен вместе с
     # запросом на регистрацию. Сделаем его доступным только на чтение.
     token = serializers.CharField(max_length=255, read_only=True)
@@ -40,7 +47,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
-    username = serializers.CharField(max_length=255, read_only=True)
+
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
     role = serializers.CharField(max_length=255, read_only=True)
@@ -90,7 +97,6 @@ class LoginSerializer(serializers.Serializer):
         # данные, которые передются в т.ч. в методы create и update.
         return {
             'email': user.email,
-            'username': user.username,
             'token': user.token,
             'role': user.role,
         }
@@ -107,6 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
+    photo = Base64ImageField()
 
     # photo = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
 
@@ -163,8 +170,6 @@ class MedPeronaSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    # token = serializers.CharField(max_length=255, read_only=True)
-
     class Meta:
         model = Patient
         # Перечислить все поля, которые могут быть включены в запрос
@@ -184,8 +189,6 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    # token = serializers.CharField(max_length=255, read_only=True)
-
     class Meta:
         model = Admin
         # Перечислить все поля, которые могут быть включены в запрос
@@ -207,4 +210,69 @@ class AdminSerializer(serializers.ModelSerializer):
 class PassportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PassportData
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return PassportData.objects.create(**validated_data)
+
+
+class SanatoriumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sanatorium
+        fields = '__all__'
+
+
+class TimeTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeTable
+        fields = '__all__'
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+
+class ServiceMedPersonaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceMedPersona
+        fields = '__all__'
+
+
+class EventSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False,use_url=True)
+
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+
+
+
+class SurveySerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False)
+
+    class Meta:
+        model = Survey
+        fields = '__all__'
+
+
+class SpecialitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speciality
+        fields = '__all__'
+
+
+class ProcedureSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(required=False)
+
+    class Meta:
+        model = Procedure
+        fields = '__all__'
+
+
+class MedcardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medcard
         fields = '__all__'
