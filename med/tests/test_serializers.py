@@ -16,8 +16,6 @@ class RegistrationSerializerTests(APITestCase):
 
     def test_creation(self):
         serializer = RegistrationSerializer(data=self.data)
-        if not serializer.is_valid():
-            print(serializer.errors)
         self.assertTrue(serializer.is_valid())
 
 
@@ -166,8 +164,8 @@ class MedPeronaSerializerTests(APITestCase):
             qualification='3',
             experience='5 years',
             location=200,
-            specilization='Second Doctors Specialization',
-            education='Second Doctors education',
+            specialization='Second Doctors Specialization',
+            education=["Second Doctor's education"],
         )
 
     def test_creation(self):
@@ -179,7 +177,7 @@ class MedPeronaSerializerTests(APITestCase):
             'experience': '3 years',
             'location': 404,
             'specilization': 'Doctors Specialization',
-            'education': 'Doctors education',
+            'education': ["Doctor's education"],
         }
 
         serializer = MedPeronaSerializer(data=data)
@@ -196,7 +194,7 @@ class MedPeronaSerializerTests(APITestCase):
             'experience': '1 year',
             'location': 777,
             'specilization': 'Doctors another Specialization',
-            'education': 'Doctors another education',
+            'education': ["Doctor's another education"],
         }
         serializer = MedPeronaSerializer(self.medpersona, data=new_data, partial=True)
         self.assertTrue(serializer.is_valid())
@@ -237,7 +235,7 @@ class PatientSerializerTests(APITestCase):
             city='Second Patients City',
             receipt_date='2021-09-01T10:00:00Z',
             type='Vacationer',
-            group='Second Patients Group',
+            group=["Second Patient's Group"],
             complaints='Seconds Patients complaints',
         )
 
@@ -250,7 +248,9 @@ class PatientSerializerTests(APITestCase):
             'city': 'Patients City',
             'receipt_date': '2021-09-01T10:00:00Z',
             'type': 'Vacationer',
-            'group': 'Patients Group',
+            'group': [
+                "Patient's Group"
+            ],
             'complaints': 'Patients complaints',
         }
 
@@ -265,7 +265,7 @@ class PatientSerializerTests(APITestCase):
             'city': 'Patients another City',
             'receipt_date': '2021-09-10T10:00:00Z',
             'type': 'Treating',
-            'group': 'Patients another Group',
+            'group': ["Patient's another Group"],
             'complaints': 'Patients more complaints',
         }
         serializer = PatientSerializer(self.patient, data=new_data, partial=True)

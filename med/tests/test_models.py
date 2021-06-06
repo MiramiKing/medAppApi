@@ -214,7 +214,7 @@ class PatientTests(APITestCase):
                 city='Patients City',
                 receipt_date='2021-09-01T10:20:00Z',
                 type='Vacationer',
-                group='Patients Group',
+                group=["Patient's Group"],
                 complaints='No complaints',
             )
         except:
@@ -226,6 +226,7 @@ class PatientTests(APITestCase):
                 user=self.user,
                 gender='Male',
                 type='Vacationer',
+                group=[],
             )
         except:
             self.assertFalse(True)
@@ -252,8 +253,8 @@ class MedPersonaTests(APITestCase):
                 qualification='3',
                 experience='3 years',
                 location=404,
-                specilization='Doctors Specialization',
-                education='Doctors education',
+                specialization='Doctors Specialization',
+                education=["Doctor's education"],
             )
         except:
             self.assertFalse(True)

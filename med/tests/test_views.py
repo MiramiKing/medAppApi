@@ -278,8 +278,8 @@ class MedPersonaAPIViewTests(APITestCase):
             qualification='3',
             experience='5 years',
             location=200,
-            specilization='Second Doctors Specialization',
-            education='Second Doctors education',
+            specialization='Second Doctors Specialization',
+            education=["Second Doctors education"],
         )
 
     def setUp(self):
