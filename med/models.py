@@ -24,7 +24,8 @@ NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
 RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
 MEDPERSONA_POSITION_CHOICES = [('Specialist', 'Специалист по услугам'), ('Doctor', 'Врач')]
 MEDPERSONA_QUALIFICATION_CHOICES = [('0', 'Без категории'), ('1', 'Первая'), ('2', 'Вторая'), ('3', 'Высшая')]
-SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Обследование', 'Survey')]
+SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Survey', 'Обследование'),
+                   ('Event', 'Мероприятие')]
 
 
 class UserManager(BaseUserManager):
@@ -34,7 +35,7 @@ class UserManager(BaseUserManager):
     же самого кода, который Django использовал для создания User (для демонстрации).
     """
 
-    def create_user(self, email, name, surname, patronymic, phone_number, role, password=None, photo=None):
+    def create_user(self, email, name, surname, phone_number, role, patronymic=None, password=None, photo=None):
         """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
 
         if email is None:
@@ -46,6 +47,8 @@ class UserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email), name=name,
                           surname=surname, patronymic=patronymic, phone_number=phone_number, role=role,
                           password=password, photo=photo)
+        if not password:
+            user.set_password(self.cleaned_data["password"])
         user.set_password(password)
         user.save()
 
@@ -89,7 +92,7 @@ class Sanatorium(models.Model):
                               )
 
     phone_number = models.CharField(max_length=18, blank=True)
-    address = models.CharField(verbose_name='Адрес', max_length=20)
+    address = models.CharField(verbose_name='Адрес', max_length=100)
 
     class Meta:
         verbose_name = 'Санаторий'
@@ -97,14 +100,6 @@ class Sanatorium(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class TimeTable(models.Model):
-    dates = ArrayField(models.DateField())
-
-    class Meta:
-        verbose_name = 'Расписание'
-        verbose_name_plural = 'Расписания'
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -131,10 +126,10 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.
     role = models.CharField(verbose_name='Роль', max_length=50, choices=ROLES_CHOICES)
-    name = models.CharField(verbose_name='Имя', max_length=30, null=True)
-    surname = models.CharField(verbose_name='Фамилия', max_length=30, null=True)
-    patronymic = models.CharField(verbose_name='Отчество', max_length=30, null=True)
-    photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True)
+    name = models.CharField(verbose_name='Имя', max_length=30)
+    surname = models.CharField(verbose_name='Фамилия', max_length=30)
+    patronymic = models.CharField(verbose_name='Отчество', max_length=30, blank=True)
+    photo = models.ImageField(verbose_name='Фотография', upload_to='users', null=True, blank=True)
 
     phone_number = models.CharField(max_length=18, blank=True)
 
@@ -163,6 +158,9 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         возможным. token называется "динамическим свойством".
         """
         return self._generate_jwt_token()
+
+    def get_name(self):
+        return self.name + ' ' + self.surname + ' ' + self.patronymic if self.patronymic else ''
 
     def get_full_name(self):
         """
@@ -247,8 +245,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Администраторы'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic if self.user.patronymic else ''
-        return name
+        return self.user.get_name()
 
 
 class Patient(models.Model):
@@ -264,28 +261,38 @@ class Patient(models.Model):
     # status = models.CharField(verbose_name='Статус', max_length=50, choices=PATIENT_STATUS_CHOICES)
     # api_tracker = models.CharField(verbose_name='Апи-трекера', max_length=200)
     type = models.CharField(verbose_name='Категория', max_length=50, choices=PATIENT_TYPE_CHOICES)
-    group = models.CharField(verbose_name='Группа', max_length=50, null=True)
-    complaints = models.TextField(verbose_name='Жалобы при поступлении')
+    group = ArrayField(models.CharField(verbose_name='Группа', max_length=50), blank=True)
+    complaints = models.TextField(verbose_name='Жалобы при поступлении', default='Нет жалоб')
 
     class Meta:
         verbose_name = 'Пациент'
         verbose_name_plural = 'Пациенты'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
     # TODO Регионы и города
 
 
 class Service(models.Model):
-    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
-    timetable = models.OneToOneField(TimeTable, verbose_name='Расписание', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name='Название')
+    sanatory = models.ForeignKey(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=255, verbose_name='Название', unique=True)
     cost = models.FloatField(verbose_name='Стоимость')
 
     class Meta:
         verbose_name = 'Услуга'
         verbose_name_plural = 'Услуги'
+
+    def __str__(self):
+        return self.name
+
+
+class TimeTable(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE)
+    dates = ArrayField(models.DateTimeField(), null=True)
+
+    class Meta:
+        verbose_name = 'Расписание'
+        verbose_name_plural = 'Расписания'
 
 
 class MedPersona(models.Model):
@@ -296,17 +303,16 @@ class MedPersona(models.Model):
                                      choices=MEDPERSONA_QUALIFICATION_CHOICES)
     # specialty = models.CharField(verbose_name='Специальность', max_length=30)
     experience = models.CharField(verbose_name='Стаж', max_length=30)
-    location = models.IntegerField(verbose_name='Расположение (кабинет)', null=True)
-    specilization = models.TextField(verbose_name='Специализация', null=True)
-    education = models.TextField(verbose_name='Образование', null=True)
+    location = models.CharField(verbose_name='Расположение (кабинет)', max_length=256, null=True, blank=True)
+    specialization = models.TextField(blank=True, null=True, verbose_name='Специализация')
+    education = ArrayField(models.TextField(), verbose_name='Образование', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Мед персона'
         verbose_name_plural = 'Мед персоны'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
 
 
 class ServiceMedPersona(models.Model):
@@ -320,11 +326,11 @@ class ServiceMedPersona(models.Model):
 
 
 class Medcard(models.Model):
-    patient = models.ForeignKey(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
-    height = models.IntegerField(verbose_name='Рост')
+    patient = models.OneToOneField(Patient, verbose_name='Пациент', on_delete=models.CASCADE)
+    height = models.IntegerField(verbose_name='Рост', null=True, blank=True)
     # расписание занятий ??
-    allergies = ArrayField(models.CharField(max_length=256))
-    rsk = models.IntegerField(verbose_name='Рекомендуемая суточная норма калорий')
+    allergies = ArrayField(models.CharField(max_length=256, blank=True), default=list, blank=True)
+    rsk = models.IntegerField(verbose_name='Рекомендуемая суточная норма калорий', null=True, blank=True)
     complaints = models.TextField(verbose_name='Жалобы', help_text='Общие субъективные жалобы')
 
     class Meta:
@@ -357,8 +363,7 @@ class PassportData(models.Model):
         verbose_name_plural = 'Паспортные данные'
 
     def __str__(self):
-        name = self.user.name + ' ' + self.user.surname + ' ' + self.user.patronymic
-        return name
+        return self.user.get_name()
 
 
 # Опрос/Анкета должна перейти в две таблицы Вопрос и Анкета - где Анкета будет содеражть список Вопросов
@@ -442,6 +447,7 @@ class Article(models.Model):
 
 
 class Translation(models.Model):
+    sanatorium = models.OneToOneField(Sanatorium, verbose_name='Санаторий', on_delete=models.CASCADE)
     heading = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     created = models.DateTimeField(editable=False, verbose_name='Дата создания')
@@ -459,10 +465,14 @@ class Translation(models.Model):
         verbose_name_plural = 'Трансляции'
 
 
-class Procedure(Service):
-    photo = models.ImageField(verbose_name='Ключ', upload_to='procedures', null=True)
+class Procedure(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    photo = models.ImageField(verbose_name='Фото', upload_to='procedures', null=True)
     description = models.TextField(verbose_name='Описание')
-    сontraindications = models.TextField(verbose_name='Противопоказания')
+    contraindications = ArrayField(models.CharField(verbose_name='Противопоказания', max_length=256), null=True,
+                                   blank=True)
+    purposes = ArrayField(models.CharField(verbose_name='Назначения', max_length=256), null=True, blank=True)
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
 
     # назначения ??
 
@@ -471,10 +481,37 @@ class Procedure(Service):
         verbose_name_plural = 'Процедуры'
 
 
-class Survey(Service):
+class Speciality(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+
+    # назначения ??
+
+    class Meta:
+        verbose_name = 'Специальность'
+        verbose_name_plural = 'Специальности'
+
+
+class Event(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
+    photo = models.ImageField(verbose_name='Фото', upload_to='events', null=True)
+    description = models.TextField(verbose_name='Содержание')
+    begin_data = models.DateField(verbose_name='Дата начала')
+    end_data = models.DateField(verbose_name='Дата окончания', null=True, blank=True)
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
+
+    # назначения ??
+
+    class Meta:
+        verbose_name = 'Мероприятие'
+        verbose_name_plural = 'Мероприятия'
+
+
+class Survey(models.Model):
+    service = models.OneToOneField(Service, verbose_name='Услуга', on_delete=models.CASCADE, null=True)
     description = models.TextField(verbose_name='Описание')
-    purposes = models.TextField(verbose_name='Назначения')
+    purposes = ArrayField(models.CharField(verbose_name='Назначения', max_length=256), null=True, blank=True)
     photo = models.ImageField(verbose_name='Фото', upload_to='surveys', null=True)
+    placement = models.CharField(verbose_name='Расположение', max_length=50)
 
     class Meta:
         verbose_name = 'Обследовние'

@@ -9,7 +9,7 @@ def dep():
         with prefix('source venv/bin/activate'):
             run('python manage.py makemigrations')
             run('python manage.py migrate')
-            run('python manage.py runserver')
+            run('sudo killall gunicorn')
 
 
 
