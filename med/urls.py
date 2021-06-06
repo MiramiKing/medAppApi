@@ -20,7 +20,7 @@ urlpatterns = [
     path('user', UserRetrieveUpdateAPIView.as_view(), name='user'),
     path('medpersona', MedPersonaAPIView.as_view(), name='medpersona'),
     path('patient', PatientAPIView.as_view()),
-    path('passport', PassportDataByUserAPIView.as_view()),
+    path('passport', PassportDataAPIView.as_view()),
     path('users/<int:pk>/passport', PassportDataByUserAPIView.as_view()),
     path('admin', AdminAPIView.as_view()),
     path('sanatorium', SanatoriumView.as_view()),
