@@ -24,7 +24,7 @@ NOTIFICATION_SEND_TIME = [('5', 5), ('10', 10), ('30', 30), ('60', 60)]
 RECOMMENDATION_CHOICES = [('Mandatory', 'Обязательный'), ('Permissive', 'Необязательный')]
 MEDPERSONA_POSITION_CHOICES = [('Specialist', 'Специалист по услугам'), ('Doctor', 'Врач')]
 MEDPERSONA_QUALIFICATION_CHOICES = [('0', 'Без категории'), ('1', 'Первая'), ('2', 'Вторая'), ('3', 'Высшая')]
-SERVICE_CHOICES = [('Specialty', 'Специальность'), ('Procedure', 'Процедура'), ('Survey', 'Обследование'),
+SERVICE_CHOICES = [('Speciality', 'Специальность'), ('Procedure', 'Процедура'), ('Survey', 'Обследование'),
                    ('Event', 'Мероприятие')]
 
 
