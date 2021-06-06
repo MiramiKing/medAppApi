@@ -1,10 +1,7 @@
 import jwt
-
-from django.conf import settings
-
-from rest_framework import authentication, exceptions
-
 from .models import UserProfile
+from django.conf import settings
+from rest_framework import authentication, exceptions
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
@@ -16,7 +13,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         ли того эндпоинт аутентификации. 'authenticate' имеет два возможных
         возвращаемых значения:
             1) None - мы возвращаем None если не хотим аутентифицироваться.
-            Обычно это означает, что мы значем, что аутентификация не удастся.
+            Обычно это означает, что мы знаем, что аутентификация не удастся.
             Примером этого является, например, случай, когда токен не включен в
             заголовок.
             2) (user, token) - мы возвращаем комбинацию пользователь/токен

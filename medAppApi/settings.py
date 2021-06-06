@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
-
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +66,14 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
-    ]
+    ],
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'TEST_REQUEST_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 ROOT_URLCONF = 'medAppApi.urls'
