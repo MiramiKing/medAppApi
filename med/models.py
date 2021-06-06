@@ -160,7 +160,15 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         return self._generate_jwt_token()
 
     def get_name(self):
-        return self.name + ' ' + self.surname + ' ' + self.patronymic if self.patronymic else ''
+        delim = ''
+        name_parts = [self.name, self.surname, self.patronymic]
+        full_name = ''
+        for part in name_parts:
+            if part != '':
+                full_name += delim + part
+                delim = ' '
+
+        return full_name
 
     def get_full_name(self):
         """
