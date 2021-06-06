@@ -3,8 +3,8 @@ from django.urls import include, path
 from .views import *
 
 urlpatterns = [
-    path('registration', RegistrationAPIView.as_view()),  # post регистрация
-    path('users/login', LoginAPIView.as_view()),  # post вход
+    path('registration', RegistrationAPIView.as_view(), name='registration'),  # post регистрация
+    path('users/login', LoginAPIView.as_view(), name='login'),  # post вход
     path('users', UserProfileListCreateView.as_view()),  #
     path('patients', PatientListCreateView.as_view()),
     path('medics', MedPersobaListCreateView.as_view()),
@@ -17,8 +17,8 @@ urlpatterns = [
     path('users/patients/<int:pk>/medcard', MedCardView.as_view()),
     path('medics/<int:pk>', MedPersonaDetailView.as_view()),
     path('admins/<int:pk>', AdminProfileDetailView.as_view()),
-    path('user', UserRetrieveUpdateAPIView.as_view()),
-    path('medpersona', MedPersonaAPIView.as_view()),
+    path('user', UserRetrieveUpdateAPIView.as_view(), name='user'),
+    path('medpersona', MedPersonaAPIView.as_view(), name='medpersona'),
     path('patient', PatientAPIView.as_view()),
     path('passport', PassportDataByUserAPIView.as_view()),
     path('users/<int:pk>/passport', PassportDataByUserAPIView.as_view()),
