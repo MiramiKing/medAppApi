@@ -1,7 +1,8 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
+from rest_framework.parsers import JSONParser
 from rest_framework.status import *
 from medAppApi.license import *
 from med.models import Patient
@@ -12,7 +13,7 @@ from organizer.filters import *
 
 class RecordList(ListCreateAPIView):
     queryset = Record.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordSerializer
     renderer_classes = [JSONRenderer]
     filterset_class = RecordFilter
@@ -38,7 +39,7 @@ class RecordList(ListCreateAPIView):
 
 class RecordDetail(RetrieveUpdateDestroyAPIView):
     queryset = Record.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordSerializer
     renderer_classes = [JSONRenderer]
 
@@ -73,7 +74,7 @@ class RecordDetail(RetrieveUpdateDestroyAPIView):
 
 class RecordServiceList(ListCreateAPIView):
     queryset = RecordService.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordServiceSerializer
     renderer_classes = [JSONRenderer]
     filterset_class = RecordServiceFilter
@@ -92,14 +93,14 @@ class RecordServiceList(ListCreateAPIView):
 
 class RecordServiceDetail(RetrieveAPIView):
     queryset = RecordService.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordServiceSerializer
     renderer_classes = [JSONRenderer]
 
 
 class RecordServiceMedPersonaList(ListCreateAPIView):
     queryset = RecordServiceMedPersona.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordMedPersonaSerializer
     renderer_classes = [JSONRenderer]
 
@@ -117,7 +118,7 @@ class RecordServiceMedPersonaList(ListCreateAPIView):
 
 class RecordServiceMedPersonaDetail(RetrieveAPIView):
     queryset = RecordServiceMedPersona.objects.all()
-    permission_classes = [IsUserPatient|IsUserMedic]
+    permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordMedPersonaSerializer
     renderer_classes = [JSONRenderer]
 
