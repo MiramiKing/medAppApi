@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView,
@@ -357,6 +358,8 @@ class ServiceMedPersonaView(ListCreateAPIView):
     queryset = ServiceMedPersona.objects.all()
     serializer_class = ServiceMedPersonaSerializer
     renderer_classes = [JSONRenderer]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = '__all__'
 
 
 class ServiceMedPersonaViewByIdIn(APIView):
