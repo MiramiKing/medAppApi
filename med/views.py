@@ -13,6 +13,7 @@ from rest_framework import status, viewsets
 from .serializers import *
 from .renderers import *
 from rest_framework.renderers import JSONRenderer
+from .filters import *
 
 
 class UserProfileListCreateView(ListCreateAPIView):
@@ -334,6 +335,7 @@ class TimetableView(ListCreateAPIView):
     queryset = TimeTable.objects.all()
     serializer_class = TimeTableSerializer
     renderer_classes = [JSONRenderer]
+    filterset_class = TimetableFilter
 
 
 class SingleTimeTableView(RetrieveUpdateDestroyAPIView):
@@ -619,7 +621,7 @@ class MedPersonaPatientAPIView(ListCreateAPIView, DestroyAPIView):
     def get(self, request, *args, **kwargs):
         qs = self.queryset.none()
         if not request.query_params:
-            qs = MedPeronaPatient.objects.all()
+            qs = MedPersonaPatient.objects.all()
             serializer_data = self.serializer_class(data=qs, many=True)
             serializer_data.is_valid(raise_exception=True)
             return Response(data=serializer_data.data, status=status.HTTP_200_OK)
