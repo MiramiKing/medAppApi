@@ -241,13 +241,11 @@ class ServiceMedPersonaSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    photo = Base64ImageField(required=False,use_url=True)
+    photo = Base64ImageField(required=False, use_url=True)
 
     class Meta:
         model = Event
         fields = '__all__'
-
-
 
 
 class SurveySerializer(serializers.ModelSerializer):
@@ -275,4 +273,10 @@ class ProcedureSerializer(serializers.ModelSerializer):
 class MedcardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medcard
+        fields = '__all__'
+
+
+class MedPersonaPatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedPeronaPatient
         fields = '__all__'

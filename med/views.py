@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView,
-                                     CreateAPIView)
+                                     CreateAPIView, DestroyAPIView)
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.serializers import ModelSerializer
@@ -605,3 +605,17 @@ class MedCardView(CreateAPIView, RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MedPeronaPatientAPIView(ListCreateAPIView, DestroyAPIView):
+    queryset = MedPeronaPatient.objects.all()
+    serializer_class = MedPersonaPatientSerializer
+    permission_classes = [IsAuthenticated]
+
+    renderer_classes = (JSONRenderer,)
+    filter_backends = [DjangoFilterBackend]
+
+    def delete(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        qs.delete()
+        return Response(status=status.HTTP_200_OK)
