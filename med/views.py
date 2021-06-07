@@ -607,8 +607,8 @@ class MedCardView(CreateAPIView, RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class MedPeronaPatientAPIView(ListCreateAPIView, DestroyAPIView):
-    queryset = MedPeronaPatient.objects.all()
+class MedPersonaPatientAPIView(ListCreateAPIView, DestroyAPIView):
+    queryset = MedPersonaPatient.objects.all()
     serializer_class = MedPersonaPatientSerializer
     permission_classes = [IsAuthenticated]
 

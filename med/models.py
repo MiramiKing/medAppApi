@@ -547,9 +547,9 @@ class RecommendationProcedure(models.Model):
         verbose_name = 'Рекомендация-Процедура'
         verbose_name_plural = 'Рекомендации-Процедуры'
 
-class MedPeronaPatient(models.Model):
+class MedPersonaPatient(models.Model):
     patient = models.OneToOneField(Patient,verbose_name='Пациент',on_delete=models.CASCADE)
-    medpersona = models.OneToOneField(MedPersona, verbose_name='Врач', on_delete=models.CASCADE)
+    medpersona = models.ForeignKey(MedPersona, verbose_name='Врач', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Врач-Пациент'

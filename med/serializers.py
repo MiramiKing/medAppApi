@@ -278,5 +278,5 @@ class MedcardSerializer(serializers.ModelSerializer):
 
 class MedPersonaPatientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MedPeronaPatient
+        model = MedPersonaPatient
         fields = '__all__'
