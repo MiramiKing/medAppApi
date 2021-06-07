@@ -616,6 +616,9 @@ class MedPeronaPatientAPIView(ListCreateAPIView, DestroyAPIView):
     filter_backends = [DjangoFilterBackend]
 
     def delete(self, request, *args, **kwargs):
-        qs = self.filter_queryset(self.get_queryset())
-        qs.delete()
-        return Response(status=status.HTTP_200_OK)
+        if request.query_params:
+            qs = self.filter_queryset(self.get_queryset())
+            qs.delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
