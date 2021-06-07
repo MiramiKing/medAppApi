@@ -614,11 +614,29 @@ class MedPeronaPatientAPIView(ListCreateAPIView, DestroyAPIView):
 
     renderer_classes = (JSONRenderer,)
     filter_backends = [DjangoFilterBackend]
+    filter_fields = ('patient', 'medpersona', 'id')
+
+    def get(self, request, *args, **kwargs):
+        qs = self.queryset.none()
+        if not request.query_params:
+            qs = MedPeronaPatient.objects.all()
+            serializer_data = self.serializer_class(data=qs, many=True)
+            serializer_data.is_valid(raise_exception=True)
+            return Response(data=serializer_data.data, status=status.HTTP_200_OK)
+        elif set(request.query_params.dict().keys()).issubset(list(self.filter_fields)):
+            try:
+                qs_ = self.filter_queryset(self.get_queryset())
+                serializer_data = self.serializer_class(qs_, many=True)
+
+                return Response(data=serializer_data.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(data=qs, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            return Response(data=qs, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def delete(self, request, *args, **kwargs):
-        if request.query_params:
+        if set(request.query_params.dict().keys()).issubset(list(self.filter_fields)):
             qs = self.filter_queryset(self.get_queryset())
             qs.delete()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
-
