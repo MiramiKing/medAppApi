@@ -18,3 +18,36 @@ class TimetableFilter(filters.FilterSet):
         fields = [
             'service'
         ]
+
+
+class ServiceFilter(filters.FilterSet):
+    service_type = filters.ChoiceFilter(
+        field_name='service_type',
+        choices=SERVICE_CHOICES,
+        method='filter_service_type'
+    );
+
+    def filter_service_type(self, queryset, name, value):
+        service_queryset = queryset.none()
+
+        if value == 'Procedure':
+            service_queryset = Procedure.objects.all()
+        elif value == 'Event':
+            service_queryset = Event.objects.all()
+        elif value == 'Survey':
+            service_queryset = Survey.objects.all()
+        elif value == 'Speciality':
+            service_queryset = Speciality.objects.all()
+
+        try:
+            service_id_list = service_queryset.values_list('service__id', flat=True)
+        except:
+            return queryset.none()
+        else:
+            return queryset.filter(id__in=service_id_list)
+
+    class Meta:
+        model = Service
+        fields = [
+            'service_type',
+        ]

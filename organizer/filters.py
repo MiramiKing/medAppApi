@@ -3,6 +3,8 @@ from organizer.models import *
 from med.models import SERVICE_CHOICES, Procedure, Event, Survey, Speciality, Service
 
 class RecordFilter(filters.FilterSet):
+    date_start__gte = filters.IsoDateTimeFilter(field_name='date_start', lookup_expr='gte')
+    date_end__lte = filters.IsoDateTimeFilter(field_name='date_end', lookup_expr='lte')
     service_type = filters.ChoiceFilter(field_name='service_type', choices=SERVICE_CHOICES, method='filter_service_type')
 
     def filter_service_type(self, queryset, name, value):
@@ -25,13 +27,9 @@ class RecordFilter(filters.FilterSet):
     class Meta:
         model = Record
         fields = [
-            'name',
-            'done',
-            'date_of_creation',
             'date_start',
             'date_end',
-            'editable',
-            'service_type'
+            'service_type',
         ]
 
 
@@ -52,7 +50,6 @@ class RecordServiceFilter(filters.FilterSet):
 
         service_id_list = service_queryset.values_list('service__id', flat=True)
         return queryset.filter(service__id__in=service_id_list)
-
 
     class Meta:
         model = RecordService

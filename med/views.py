@@ -348,6 +348,7 @@ class ServiceView(ListCreateAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     renderer_classes = [JSONRenderer]
+    filterset_class = ServiceFilter
 
 
 class SingleServiceView(RetrieveUpdateDestroyAPIView):
