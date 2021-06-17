@@ -34,7 +34,7 @@ urlpatterns = [
     path('service/<int:pk>/event', SingleEventViewByService.as_view()),
     path('service/<int:pk>/procedure', SingleProcedureViewByService.as_view()),
     path('service/<int:pk>/survey', SingleSurveyViewByService.as_view()),
-    path('service/<int:pk>/speciality', ServiceMedPersonaByServiceView.as_view()),
+    path('service/<int:pk>/speciality', SingleSpecialityViewByService.as_view()),
     path('servicemedper', ServiceMedPersonaView.as_view()),
     path('servicemedper/', ServiceMedPersonaViewByIdIn.as_view()),
     path('servicemedper/<int:pk>', SingleServiceMedPersonaView.as_view()),

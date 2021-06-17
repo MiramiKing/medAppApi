@@ -156,3 +156,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'med.UserProfile'
+
+CORS_ORIGIN_WHITELIST = [
+    'http://127.0.0.1:8000',
+    'https://saturn-mis.online/',
+]

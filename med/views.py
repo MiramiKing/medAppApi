@@ -1,11 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView,
                                      CreateAPIView, DestroyAPIView)
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.serializers import ModelSerializer
 from medAppApi.license import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -623,8 +621,8 @@ class MedPersonaPatientAPIView(ListCreateAPIView, DestroyAPIView):
         qs = self.queryset.none()
         if not request.query_params:
             qs = MedPersonaPatient.objects.all()
-            serializer_data = self.serializer_class(data=qs, many=True)
-            serializer_data.is_valid(raise_exception=True)
+            serializer_data = self.serializer_class(qs,many=True)
+
             return Response(data=serializer_data.data, status=status.HTTP_200_OK)
         elif set(request.query_params.dict().keys()).issubset(list(self.filter_fields)):
             try:
