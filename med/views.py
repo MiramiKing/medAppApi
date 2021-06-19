@@ -422,12 +422,16 @@ class ServiceMedPersonaByMedicView(ListCreateAPIView):
     serializer_class = ServiceMedPersonaSerializer
     renderer_classes = (JSONRenderer,)
     permission_classes = [IsAuthenticated]
+    filterset_class = ServiceMedPersonaFilter
 
-    def get(self, request, *args, **kwargs):
-        servicemedpers = ServiceMedPersona.objects.filter(medpersona=kwargs['pk'])
-        serializer = self.serializer_class(servicemedpers, many=True)
+    def get_queryset(self):
+        return ServiceMedPersona.objects.filter(medpersona=self.kwargs['pk'])
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # def list(self, request, *args, **kwargs):
+    #     servicemedpers = ServiceMedPersona.objects.filter(medpersona=kwargs['pk'])
+    #     serializer = self.serializer_class(servicemedpers, many=True)
+
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProcedureView(ListCreateAPIView):

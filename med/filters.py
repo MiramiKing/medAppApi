@@ -20,6 +20,39 @@ class TimetableFilter(filters.FilterSet):
         ]
 
 
+class ServiceMedPersonaFilter(filters.FilterSet):
+    service_type = filters.ChoiceFilter(
+        field_name='service_type',
+        choices=SERVICE_CHOICES,
+        method='filter_service_type'
+    );
+
+    def filter_service_type(self, queryset, name, value):
+        service_queryset = None
+
+        if value == 'Procedure':
+            service_queryset = Procedure.objects.all()
+        elif value == 'Event':
+            service_queryset = Event.objects.all()
+        elif value == 'Survey':
+            service_queryset = Survey.objects.all()
+        elif value == 'Speciality':
+            service_queryset = Speciality.objects.all()
+
+        try:
+            service_id_list = service_queryset.values_list('service__id', flat=True)
+        except:
+            return queryset.none()
+        else:
+            return queryset.filter(service__id__in=service_id_list)
+
+    class Meta:
+        model = ServiceMedPersona
+        fields = [
+            'service_type',
+        ]
+
+
 class ServiceFilter(filters.FilterSet):
     service_type = filters.ChoiceFilter(
         field_name='service_type',
@@ -28,7 +61,7 @@ class ServiceFilter(filters.FilterSet):
     );
 
     def filter_service_type(self, queryset, name, value):
-        service_queryset = queryset.none()
+        service_queryset = None
 
         if value == 'Procedure':
             service_queryset = Procedure.objects.all()
