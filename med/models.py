@@ -227,7 +227,7 @@ class NotificationSettings(models.Model):
 class Notes(models.Model):
     user = models.ForeignKey(UserProfile, verbose_name='Пользователь', on_delete=models.CASCADE)
     title = models.CharField(verbose_name='Заголовок', max_length=50)
-    date_of_creation = models.DateField(verbose_name='Дата создания', blank=True, default=timezone.now)
+    date_of_creation = models.DateField(verbose_name='Дата создания', blank=True, default=date.today)
 
     class Meta:
         verbose_name = 'Заметка'
@@ -237,7 +237,7 @@ class Notes(models.Model):
 class Task(models.Model):
     description = models.TextField(verbose_name='Содержание')
     status = models.CharField(verbose_name='Статус', max_length=50, choices=TASK_STATUS_CHOICES)
-    note = models.ForeignKey(Notes, verbose_name='Заметки', on_delete=models.CASCADE, null=True)
+    note = models.ForeignKey(Notes, verbose_name='Заметки', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Задача'
