@@ -10,12 +10,30 @@ from organizer.serializers import *
 from organizer.models import *
 from organizer.filters import *
 
+def get_user_notes(request, note_id):
+    notes = Notes.objects.filter(user=request.user)
+    if note_id == '':
+        return None
+    return notes.filter(id=note_id)
+
+def get_user_tasks(request, task_id):
+    tasks = Task.objects.filter(note__user=request.user)
+    if task_id == '':
+        return None
+    return tasks.filter(id=task_id)
+
 
 class NoteList(ListCreateAPIView):
     queryset = Notes.objects.all()
     permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = NoteSerializer
     renderer_classes = [JSONRenderer]
+
+    def list(self, request, *args, **kwargs):
+        notes = Notes.objects.filter(user=request.user)
+        serializer = self.serializer_class(notes, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
+
 
     def create(self, request, *args, **kwargs):
         data = JSONParser().parse(request)
@@ -33,11 +51,17 @@ class NoteDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = NoteSerializer
     renderer_classes = [JSONRenderer]
 
-    # def partial_update(sefl, request, *args, **kwargs):
-    #     pass
+    def retrieve(self, request, *args, **kwargs):
+        notes = get_user_object(request, Notes.objects.all(), kwargs.get('pk', ''))
+        if notes == None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        elif len(notes) == 0:
+            return Response(status=HTTP_404_NOT_FOUND)
 
-    # def destroy(self, request, *args, **kwargs):
-    #     pass
+        note = notes[0]
+
+        serializer = self.serializer_class(note)
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 class TaskList(ListCreateAPIView):
@@ -46,22 +70,25 @@ class TaskList(ListCreateAPIView):
     renderer_classes = [JSONRenderer]
 
     def list(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
+        notes = get_user_notes(request, kwargs.get('note_pk', ''))
+        if notes == None:
             return Response(status=HTTP_400_BAD_REQUEST)
+        elif len(notes) == 0:
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(Task.objects.filter(note=note), many=True)
+        note = notes[0]
+        task = Task.objects.filter(note=note)
+        serializer = self.serializer_class(task, many=True)
         return Response(serializer.data, status=HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
+        notes = get_user_notes(request, kwargs.get('note_pk', ''))
+        if notes == None:
             return Response(status=HTTP_400_BAD_REQUEST)
+        elif len(notes) == 0:
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        request.data['note'] = note.id
-        print(request.data)
+        request.data['note'] = notes[0].id
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -75,50 +102,28 @@ class TaskDetail(RetrieveUpdateDestroyAPIView):
     renderer_classes = [JSONRenderer]
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
+        tasks = get_user_tasks(request, kwargs.get('task_pk', ''))
+        if tasks == None:
             return Response(status=HTTP_400_BAD_REQUEST)
-
-        task_queryset = Task.objects.filter(note=note)
-        try:
-            task = task_queryset.get(id=kwargs['task_pk'])
-        except Task.DoesNotExist:
+        elif len(tasks) == 0:
             return Response(status=HTTP_404_NOT_FOUND)
+        task = tasks[0]
 
         serializer = self.serializer_class(task)
         return Response(serializer.data, status=HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
-            return Response(status=HTTP_400_BAD_REQUEST)
-
-        task_queryset = Task.objects.filter(note=note)
-        try:
-            task = task_queryset.get(id=kwargs['task_pk'])
-        except Task.DoesNotExist:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        data = JSONParser().parse(request)
-        serializer = self.serializer_class(task, data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=HTTP_200_OK)
+        return Response(serializer.data, status=HTTP_405_METHOD_NOT_ALLOWED)
 
     def partial_update(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
-            return Response(status=HTTP_400_BAD_REQUEST)
+        # можно доставать сразу по id, потому что таблица Задач глобальная
+        tasks = get_user_tasks(request, kwargs.get('task_pk', ''))
 
-        task_queryset = Task.objects.filter(note=note)
-        try:
-            task = task_queryset.get(id=kwargs['task_pk'])
-        except Task.DoesNotExist:
+        if tasks == None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        elif len(tasks) == 0:
             return Response(status=HTTP_404_NOT_FOUND)
+        task = tasks[0]
 
         data = JSONParser().parse(request)
         serializer = self.serializer_class(task, data=data, partial=True)
@@ -129,16 +134,13 @@ class TaskDetail(RetrieveUpdateDestroyAPIView):
 
 
     def destroy(self, request, *args, **kwargs):
-        try:
-            note = Notes.objects.get(id=kwargs['note_pk'])
-        except Notes.DoesNotExist:
-            return Response(status=HTTP_400_BAD_REQUEST)
+        tasks = get_user_tasks(request, kwargs.get('task_pk', ''))
 
-        task_queryset = Task.objects.filter(note=note)
-        try:
-            task = task_queryset.get(id=kwargs['task_pk'])
-        except Task.DoesNotExist:
+        if tasks == None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        elif len(tasks) == 0:
             return Response(status=HTTP_404_NOT_FOUND)
+        task = tasks[0]
 
         task.delete()
         return Response(status=HTTP_204_NO_CONTENT)
@@ -150,6 +152,12 @@ class RecordList(ListCreateAPIView):
     serializer_class = RecordSerializer
     renderer_classes = [JSONRenderer]
     filterset_class = RecordFilter
+
+    def get_queryset(self):
+        if self.request.user.role == 'Patient':
+            return Record.objects.filter(patient__user=self.request.user)
+        else:
+            return Record.objects.all()
 
     def create(self, request, *args, **kwargs):
         if request.user.role != 'Patient':
@@ -175,6 +183,19 @@ class RecordDetail(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordSerializer
     renderer_classes = [JSONRenderer]
+
+    def retrieve(self, request, *args, **kwargs):
+        if request.user.role == 'Patient':
+            records = Record.objects.filter(patient__user=request.user)
+        else:
+            records = Record.objects.all()
+        
+        try:
+            record = records.get(pk=kwargs['pk'])
+        except Record.DoesNotExist:
+            return Response(status=HTTP_403_FORBIDDEN)
+        serializer = self.serializer_class(record)
+        return Response(serializer.data, status=HTTP_200_OK)
 
     def partial_update(self, request, *args, **kwargs):
         if request.user.role != 'Doctor':
@@ -212,6 +233,12 @@ class RecordServiceList(ListCreateAPIView):
     renderer_classes = [JSONRenderer]
     filterset_class = RecordServiceFilter
 
+    def get_queryset(self):
+        if self.request.user.role == 'Patient':
+            return RecordService.objects.filter(record__patient__user=self.request.user)
+        else:
+            return RecordService.objects.all()
+
     def create(self, request, *args, **kwargs):
         if request.user.role != 'Patient':
             return Response(status=HTTP_403_FORBIDDEN)
@@ -236,6 +263,12 @@ class RecordServiceMedPersonaList(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsUserPatient|IsUserMedic]
     serializer_class = RecordMedPersonaSerializer
     renderer_classes = [JSONRenderer]
+
+    def get_queryset(self):
+        if self.request.user.role == 'Patient':
+            return RecordServiceMedPersona.objects.filter(record_service__record__patient__user=self.request.user)
+        else:
+            return RecordServiceMedPersona.objects.all()
 
     def create(self, request, *args, **kwargs):
         if request.user.role != 'Patient':
